@@ -5,7 +5,7 @@
 #include "TiposBasicos.h"
 
     template<class T>
-    class Arreglo{
+    class Dato{
         bool mismoTipo?(Dato d1,Dato d2);
         Dato min(Conj(Dato) c);
         Dato max(Conj(Dato) c)
@@ -45,7 +45,7 @@
     };
 
    
-    bool operator==(const Dato&, const Arreglo<T>&);
+    bool operator==(const Dato& d1, const Dato<T>& d2);
 
     template<class T>
     std::ostream& operator<<(std::ostream& os, const Dato&);
@@ -74,6 +74,76 @@ const string& Dato::valorStr(){
 bool Dato::esString?(){
 	return !(this.nat?);
 }
+
+	Dato::datoString(string s){
+		nat?=false;
+		valorStr=s;
+		valorNat=0;
+	}
+
+	Dato::datoNat(unsigned int n){
+		nat?=true;
+		valorStr=n;
+		valorNat=0;
+	}
+
+    bool mismoTipo?(Dato d1,Dato d2){
+    	return (d1.esNat?==d2.esNat?);
+    }
+
+    Dato min(Conj(Dato) c){
+    	Iterador it = c.crearIt();
+    	Dato minimo = it.siguiente();
+    	while(it.haySiguiente?()){
+    		if ( menorOIgual(it.siguiente(),minimo)){
+    			minimo=it.siguiente();
+    		}
+			it.Avanzar();
+    	}
+    	return minimo;
+    }
+
+      Dato max(Conj(Dato) c){
+    	Iterador it = c.crearIt();
+    	Dato maximo = it.siguiente();
+    	while(it.haySiguiente?()){
+    		if ( !menorOIgual(it.siguiente(),maximo)){
+    			maximo=it.siguiente();
+    		}
+			it.Avanzar();
+    	}
+    	return maximo;
+    }
+
+bool menorOIgual(Dato d1, Dato d2){
+	assert(mismoTipo?(d1,d2))
+	if (d1.esNat?){
+		return d1.datoNat<=d2.datoNat;
+	}
+	else{
+		bool res=true;
+		unsigned int i =0;
+		while(res && i<min(longitud(d1.valorStr),longitud(e2.valorStr))){
+			if (d1.valorStr[i]>d2.valorStr[i]){
+				res=false;
+			}
+			i++;
+		}
+	}
+	return res;
+}
+
+    bool operator==(const Dato& d1, const Dato d2&){
+    	if (mismoTipo?(d1,d2)){
+    		if (d1.esNat?){
+    			return (d1.valorNat==d2.valorNat);
+    		}else{
+    			return (d1.valorStr==d2.valorStr);
+    		}
+    	}else{
+    		return false;
+    	}
+    }
 }
 
 
