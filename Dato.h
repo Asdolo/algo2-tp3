@@ -4,7 +4,6 @@
 
 #include "TiposBasicos.h"
 
-    template<class T>
     class Dato{
         bool mismoTipo?(Dato d1,Dato d2);
         Dato min(Conj(Dato) c);
@@ -75,17 +74,6 @@ bool Dato::esString?(){
 	return !(this.nat?);
 }
 
-	Dato::datoString(string s){
-		nat?=false;
-		valorStr=s;
-		valorNat=0;
-	}
-
-	Dato::datoNat(unsigned int n){
-		nat?=true;
-		valorStr=n;
-		valorNat=0;
-	}
 
     bool mismoTipo?(Dato d1,Dato d2){
     	return (d1.esNat?==d2.esNat?);
