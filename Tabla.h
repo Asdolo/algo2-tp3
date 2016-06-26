@@ -35,7 +35,7 @@
 
  };
 
- Dato::Tabla(String nombre,Conj(String) claves,Registro columnas) : indicesString(Vacio()), indicesNat(Vacio()),registros(Vacio()),nombre(copiar(nombre)),campos(Vacio()),claves(copiar(claves)),campoIndexadoNat(Vacio()),campoIndexadoString(Vacio()),cantAccesos(0) {
+ Tabla::nuevaTabla(String nombre,Conj(String) claves,Registro columnas) : indicesString(Vacio()), indicesNat(Vacio()),registros(Vacio()),nombre(copiar(nombre)),campos(Vacio()),claves(copiar(claves)),campoIndexadoNat(Vacio()),campoIndexadoString(Vacio()),cantAccesos(0) {
  	Iterador iter = columnas.vistaDicc();
  	while(iter.HaySiguiente()){
  		definir(iter.siguiente().clave,nat(iter.Siguiente().significado,campos));
