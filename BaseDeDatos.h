@@ -132,7 +132,23 @@ while(iter.haySiguiente()){
 
 }
 
+Conj(Registro) combinarRegistros(String t1, String t2, String campo){
+	Tabla tabla1= obtener(t1,nombreATabla);
+		Tabla tabla2= obtener(t2,nombreATabla);
+		Tabla tablaIt;
+		Tabla tablaBusq;
+		if (Indices(tabla1).pertenece(campo))
+		{
+			 tablaIt=tabla2;
+			 tablaBusq=tabla1;		}else{
+tablaIt=tabla1;
+			 tablaBusq=tabla2;	
 
+			}
+			Conj(Registro) res= vacio();
+			//COMPLETAR!
+
+}
 
 
 
