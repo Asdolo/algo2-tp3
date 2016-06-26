@@ -140,18 +140,128 @@ Conj(Registro) combinarRegistros(String t1, String t2, String campo){
 		if (Indices(tabla1).pertenece(campo))
 		{
 			 tablaIt=tabla2;
-			 tablaBusq=tabla1;		}else{
-tablaIt=tabla1;
+			 tablaBusq=tabla1;		}
+			 else{
+				tablaIt=tabla1;
 			 tablaBusq=tabla2;	
 
 			}
 			Conj(Registro) res= vacio();
-			//COMPLETAR!
+			Iterador it = crearIt(Registros(tablaIt));
+			Registro regMergeado;
+			while(it.haySiguiente()){
+				Dato d = obtener(c,it.Siguiente());
+				?? coincis = buscar(campo,d,tablaBusq);
+				if (!vacia?(coincis))
+				{
+					
+					if (tablaBusq.nombre()==t1)
+					{
+						regMergeado= Merge(Prim(coincis),it.Siguiente());
+
+					}else{
+						regMergeado= Merge(it.Siguiente(),Prim(coincis));
+					}
+				}
+				AgregarRapido(regMergeado,res);
+				it.Avanzar();
+			}
+
+return res;			
+}
+
+Iterador(Conj(Registro)) BaseDeDatos::generarVistaJoin(String t1, String t2, String campo){
+	Tupla aux = Tupla(campo,vacio(),vacio());
+	definir(t2,aux,obtener(t1,hayJoin));
+	definir(t2,vacio(),obtener(t1,registrosDelJoin));
+	Tabla tabla1= obtener(t1,nombreATabla);
+		Tabla tabla2= obtener(t2,nombreATabla);
+		if (tabla1.tipoCampo(campo))
+		{
+			definir(t2,vacio(),obtener(t1,joinPorCampoNat));
+			?? regsMergeados = combinarRegistros(t1,t2,campo);
+			Iterador it = crearIt(regsMergeados);
+			while(it.haySiguiente()){
+				Dato d = obtener(campo,it.Siguiente());
+				Iterador iter = AgregarRapido(it.Siguiente(),obtener(t2,obtener(t1,registrosDelJoin)));
+				unsigned int n = d.valorNat();
+				definir(n,iter,obtener(t2,obtener(t1,joinPorCampoNat)));
+				it.Avanzar();
+			}
+		}else{
+			definir(t2,vacio(),obtener(t1,joinPorCampoString));
+			?? regsMergeados = combinarRegistros(t1,t2,campo);
+			Iterador it = crearIt(regsMergeados);
+			while(it.haySiguiente()){
+				Dato d = obtener(campo,it.Siguiente());
+				Iterador iter = AgregarRapido(it.Siguiente(),obtener(t2,obtener(t1,registrosDelJoin)));
+				String s = d.valorStr();
+				definir(s,iter,obtener(t2,obtener(t1,joinPorCampoString)));
+				it.Avanzar();
+			}
+		}
+
+		Iterador(Conj(Registro)) res = crearIt(obtener(t2,obtener(t1,registrosDelJoin)));
+		return res;
+}
+
+void BaseDeDatos::BorrarJoin(String t1, String t2){
+borrar(t2,obtener(t1,hayJoin));
+borrar(t2,obtener(t1,registrosDelJoin));
+if (def(t2,obtener(t1,joinPorCampoNat)))
+{
+	borrar(t2,obtener(t1,joinPorCampoNat));
+}else{
+	borrar(t2,obtener(t1,joinPorCampoString));
+}
 
 }
 
+Iterador(String) BaseDeDatos::tablas(){
+return crearIt(tablas);
+}
+
+Tabla BaseDeDatos::dameTabla(String s){
+return obtener(s,nombreATabla);
+}
+
+bool BaseDeDatos::hayJoin(String s1,String s2){
+return def(s2,obtener(s1,hayJoin));
+}
+
+String BaseDeDatos::campoJoin(String s1, String s2){
+
+return (obtener(s2,obtener(s1,hayJoin))).campoJoin;
+}
+
+Registro Merge(Registro r1, Registro r2){
+	Registro res = copiar(r1);
+	Iterador ite = vistaDicc(r2);
+	while(ite.haySiguiente()){
+		if (!def(ite.Siguiente().clave,res))
+		{
+			definir(ite.Siguiente().clave,ite.Siguiente().significado,res);
+		}
+		ite.Avanzar();
+	}
+}
 
 
+Iterador(Conj(Registro)) BaseDeDatos::vistaJoin(String s1, String s2){
+//COMPLETAR!!
+}
+
+Conj(Registro) BaseDeDatos::busquedaCriterio(Registro crit,String t){
+	//COMPLETAR!!
+}
+
+bool coincidenTodosCrit(Registro crit,Registro r){
+	//COMPLETAR!!
+}
+
+String BaseDeDatos::tablaMaxima(){
+	return (*tablaMasAccedida);
+}
 }
 
 
