@@ -61,9 +61,9 @@ using namespace std;
     	return !(nat);
     }
 
-    bool mismoTipo(const Dato& d1,const Dato& d2){
-      return d1.esNat()==d2.esNat();
-    }
+    bool Dato::mismoTipo(const Dato& d1,const Dato& d2){
+      return (d1.esNat()==d2.esNat());
+    };
 
     const Dato min(Conj<Dato> c){
     	Conj<Dato>::Iterador it = c.CrearIt();
