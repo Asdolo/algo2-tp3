@@ -1,6 +1,7 @@
 
 #ifndef BASEDEDATOS_H_INCLUDED
 #define BASEDEDATOS_H_INCLUDED
+#define Registro diccString<Dato>
 
 #include "aed2.h"
 #include <cassert>
