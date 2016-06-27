@@ -2,137 +2,139 @@
 #ifndef DATO_H_INCLUDED
 #define DATO_H_INCLUDED
 
-#include "TiposBasicos.h"
+#include "aed2.h"
+#include <cassert>
+#include <string>
+#include <iostream>
+
+using namespace std;
 
     class Dato{
-        bool mismoTipo(Dato d1,Dato d2);
-        Dato min(Conj(Dato) c);
-        Dato max(Conj(Dato) c)
-        bool menorOIgual(Dato d1,Dato d2);
-        bool sonIguales(Dato d1,Dato d2);
 
         public:
-
-            /**
-             * Crea un dato de tipo string.
-             */
-            datoString(string s);
-
-           /**
-             * Crea un dato de tipo Nat.
-             */
-            datoNat(unsigned int n);
-
-            /**
-             * Devuelve true si el dato es de tipo nat.
-             */
-            bool esNat();
-
-            unsigned int valorNat();
-
-            const string& valorStr();
-
-            bool esString();
-
+            //Operators, constructores, etc
+            bool operator<(const Dato& d) const;
+            bool operator>(const Dato& d) const;
+            bool operator<=(const Dato& d) const;
+            bool operator>=(const Dato& d) const;
+            bool operator==(const Dato& d) const;
+            ostream& operator<<(ostream& os);
             Dato(const Dato& otro);
 
 
+            //Interfaz
+            static Dato datoString(string s)    { return Dato(false, s, 0);      };
+            static Dato datoNat(unsigned int n) { return Dato(true, "vacio", n); };
+            bool esNat() const;
+            bool esString() const;
+            unsigned int dame_valorNat() const;
+            const string& dame_valorStr() const;
+
+            static bool mismoTipo(const Dato& d1,const Dato& d2);
+            static const Dato& min(Conj<const Dato&> cd);
+            static const Dato& max(Conj<const Dato&> cd);
+
         private:
+            // Campos
             bool nat;
-            String valorStr;
+            string valorStr;
             unsigned int valorNat;
+
+            //Constructor auxiliar
+            Dato(bool es_nat, string s, unsigned int n) : nat(es_nat), valorStr(s), valorNat(n) {};
     };
 
-   
-    bool operator==(const Dato& d1, const Dato<T>& d2);
+    bool Dato::esNat() const{
+    	return nat;
+    }
 
-    template<class T>
-    std::ostream& operator<<(std::ostream& os, const Dato&);
+    unsigned int Dato::dame_valorNat() const{
+    	assert(nat);
+    	return valorNat;
+    }
 
+    const string& Dato::dame_valorStr() const{
+    	assert(!nat);
+    	return valorStr;
+    }
 
-Dato::datoNat(unsigned int n) : nat(true), valorStr(""),valorNat(n) {}
-
-Dato::datoString(String s) : nat(false), valorStr(s),valorNat(0) {}
-Dato::Dato(const Dato& otro) : nat(otro.nat),valorStr(otro.valorStr),valorNat(otro.valorNat){}
-
-
-bool Dato::esNat(){
-	return this.nat;
-}
-
-unsigned int Dato::valorNat(){
-	assert(nat);
-	return this.valorNat;
-}
-
-const string& Dato::valorStr(){
-	assert(!nat);
-	return this.valorStr;
-}
-
-bool Dato::esString(){
-	return !(this.nat);
-}
+    bool Dato::esString() const{
+    	return !(nat);
+    }
 
 
     bool mismoTipo(Dato d1,Dato d2){
-    	return (d1.esNat==d2.esNat);
+    	return d1.esNat()==d2.esNat();
     }
 
-    Dato min(Conj(Dato) c){
-    	Iterador it = c.crearIt();
-    	Dato minimo = it.siguiente();
-    	while(it.haySiguiente()){
-    		if ( menorOIgual(it.siguiente(),minimo)){
-    			minimo=it.siguiente();
+    const Dato& min(Conj<Dato> c){
+    	Conj<Dato>::Iterador it = c.CrearIt();
+    	Dato minimo = it.Siguiente();
+    	while(it.HaySiguiente()){
+    		if ( it.Siguiente() <= minimo ){
+    			minimo = it.Siguiente();
     		}
-			it.Avanzar();
+    	it.Avanzar();
     	}
     	return minimo;
     }
 
-      Dato max(Conj(Dato) c){
-    	Iterador it = c.crearIt();
-    	Dato maximo = it.siguiente();
-    	while(it.haySiguiente()){
-    		if ( !menorOIgual(it.siguiente(),maximo)){
-    			maximo=it.siguiente();
-    		}
-			it.Avanzar();
-    	}
-    	return maximo;
+
+    const Dato& max(Conj<Dato> c){
+      Conj<Dato>::Iterador it = c.CrearIt();
+      Dato maximo = it.Siguiente();
+      while(it.HaySiguiente()){
+      	if ( it.Siguiente() > maximo ){
+      		maximo = it.Siguiente();
+      	}
+      it.Avanzar();
+      }
+      return maximo;
     }
 
-bool menorOIgual(Dato d1, Dato d2){
-	assert(mismoTipo(d1,d2))
-	if (d1.esNat){
-		return d1.datoNat<=d2.datoNat;
-	}
-	else{
-		bool res=true;
-		unsigned int i =0;
-		while(res && i<min(longitud(d1.valorStr),longitud(e2.valorStr))){
-			if (d1.valorStr[i]>d2.valorStr[i]){
-				res=false;
-			}
-			i++;
-		}
-	}
-	return res;
-}
+    bool Dato::operator<=(const Dato& otro) const{
+    	assert( mismoTipo(*this, otro) );
+      bool res;
+      if ( this->esNat() ){
+    		return this->valorNat <= otro.valorNat;
+    	}
+      else {
+    		res = true;
+    		unsigned int i = 0;
+    		while( res && i < (this->valorStr).length() && i < (otro.valorStr).length() ){
+    			if ( this->valorStr[i] > otro.valorStr[i] ){
+    				res = false;
+    			}
+    			i++;
+    		}
+    	}
+    	return res;
+    }
 
-    bool operator==(const Dato& d1, const Dato d2&){
-    	if (mismoTipo(d1,d2)){
-    		if (d1.esNat){
-    			return (d1.valorNat==d2.valorNat);
+    bool Dato::operator<(const Dato& otro) const{
+      return (*this <= otro) && !(*this == otro );
+    }
+
+    bool Dato::operator>(const Dato& otro) const{
+      return (otro < *this);
+    }
+
+    bool Dato::operator>=(const Dato& otro) const{
+      return (otro <= *this);
+    }
+
+
+    bool Dato::operator==(const Dato& otro) const{
+    	if (mismoTipo(*this, otro)){
+    		if (this->esNat()){
+    			return (this->valorNat == otro.valorNat);
     		}else{
-    			return (d1.valorStr==d2.valorStr);
+    			return (this->valorStr == otro.valorStr);
     		}
     	}else{
     		return false;
     	}
     }
-}
 
 
 
