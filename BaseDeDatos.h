@@ -2,7 +2,12 @@
 #ifndef BASEDEDATOS_H_INCLUDED
 #define BASEDEDATOS_H_INCLUDED
 
-#include "TiposBasicos.h"
+#include "aed2.h"
+#include <cassert>
+#include <string>
+#include <iostream>
+
+using namespace std;
 
     class BaseDeDatos{
 
@@ -21,43 +26,43 @@
             /**
              * Inserta un registro en una tabla
              */
-            insertarEntrada(Registro r, String s);
+            insertarEntrada(Registro r, string s);
 
-            Borrar(Registro cr,String t);
+            Borrar(Registro cr,string t);
 
-            Conj(Regisro) combinarRegistros(String t1,String t2,String campo);
+            Conj(Regisro) combinarRegistros(string t1,string t2,string campo);
 
-            Iterador(Conj(Registro)) generarVistaJoin(String t1, String t2, String campo);
+            Iterador(Conj(Registro)) generarVistaJoin(string t1, string t2, string campo);
 
-            BorrarJoin(String t1, String t2);
+            BorrarJoin(string t1, string t2);
 
-            Iterador(Conj(String)) Tablas();
+            Iterador(Conj(string)) Tablas();
 
-            Tabla dameTabla(String t);
+            Tabla dameTabla(string t);
 
-            bool hayJoin(String t1, String t2);
+            bool hayJoin(string t1, string t2);
 
-            String campoJoin(String t1, String t2);
+            string campoJoin(string t1, string t2);
 
-            Registro Merge(Registro r1, Registro r2);
+            static Registro Merge(Registro r1, Registro r2);
 
-            Iterador(Conj(Registro)) vistaJoin(String t1, String t2);
+            Iterador(Conj(Registro)) vistaJoin(string t1, string t2);
 
-           	Conj(Registro) busquedaCriterio(Registro cr, String t);
+           	Conj(Registro) busquedaCriterio(Registro cr, string t);
 
-           	bool coincidenTodosCrit(Registro crit, Registro r);
+           	static bool coincidenTodosCrit(Registro crit, Registro r);
 
-           	String tablaMaxima();
+           	string tablaMaxima();
 
 
         private:
-            String* tablaMasAccedida;
+            string* tablaMasAccedida;
             diccString(Tabla) nombreATabla;
-            Conj(String) tablas;
+            Conj(string) tablas;
             diccString(diccString(diccNat(Iterador(Conj(Registro))))) joinPorCampoNat;
             diccString(diccString(diccString(Iterador(Conj(Registro))))) joinPorCampoString;
             diccString(diccString(Conj(Registro))) registrosDelJoin;
-            diccString(diccString(Tupla(String campoJoin,Lista(Tupla(Registro reg, bool agregar)) cambiosT1,Lista(Tupla(Registro reg, bool agregar)) cambiosT2))) hayJoin;
+            diccString(diccString(Tupla(string campoJoin,Lista(Tupla(Registro reg, bool agregar)) cambiosT1,Lista(Tupla(Registro reg, bool agregar)) cambiosT2))) hayJoin;
     };
 
    
@@ -70,10 +75,9 @@
 BaseDeDatos::BaseDeDatos() : tablaMasAccedida(NULL), nombreATabla(vacio()),tablas(vacia()),hayJoin(vacio()),joinPorCampoString(vacio()),joinPorCampoNat(vacio()),registrosDelJoin(vacio()) {}
 
 
-void BaseDeDatos::agregarTabla(String t){
+void BaseDeDatos::agregarTabla(string t){
 	if (tablaMasAccedida==NULL || nombreATabla(*tablaMasAccedida).cantidadDeAccesos < t.cantidadDeAccesos){
 		tablaMasAccedida= &(t.nombre);
-
 		}
 		definir(t.nombre,t,nombreATabla);
 		AgregarRapido(t.nombre,tablas);
@@ -108,7 +112,7 @@ while(iter.haySiguiente()){
 }
 }
 
-void BaseDeDatos::borrar(Registro cr, String t){
+void BaseDeDatos::borrar(Registro cr, string t){
 	Tabla tabla = obtener(t,nombreATabla);
 	t.borrarRegistro(cr);
 	Tabla tabMax = obtener(*(tablaMasAccedida),nombreATabla);
@@ -132,7 +136,7 @@ while(iter.haySiguiente()){
 
 }
 
-Conj(Registro) combinarRegistros(String t1, String t2, String campo){
+Conj(Registro) combinarRegistros(string t1, string t2, string campo){
 	Tabla tabla1= obtener(t1,nombreATabla);
 		Tabla tabla2= obtener(t2,nombreATabla);
 		Tabla tablaIt;
@@ -170,7 +174,7 @@ Conj(Registro) combinarRegistros(String t1, String t2, String campo){
 return res;			
 }
 
-Iterador(Conj(Registro)) BaseDeDatos::generarVistaJoin(String t1, String t2, String campo){
+Iterador(Conj(Registro)) BaseDeDatos::generarVistaJoin(string t1, string t2, string campo){
 	Tupla aux = Tupla(campo,vacio(),vacio());
 	definir(t2,aux,obtener(t1,hayJoin));
 	definir(t2,vacio(),obtener(t1,registrosDelJoin));
@@ -195,7 +199,7 @@ Iterador(Conj(Registro)) BaseDeDatos::generarVistaJoin(String t1, String t2, Str
 			while(it.haySiguiente()){
 				Dato d = obtener(campo,it.Siguiente());
 				Iterador iter = AgregarRapido(it.Siguiente(),obtener(t2,obtener(t1,registrosDelJoin)));
-				String s = d.valorStr();
+				string s = d.valorStr();
 				definir(s,iter,obtener(t2,obtener(t1,joinPorCampoString)));
 				it.Avanzar();
 			}
@@ -205,7 +209,7 @@ Iterador(Conj(Registro)) BaseDeDatos::generarVistaJoin(String t1, String t2, Str
 		return res;
 }
 
-void BaseDeDatos::BorrarJoin(String t1, String t2){
+void BaseDeDatos::BorrarJoin(string t1, string t2){
 borrar(t2,obtener(t1,hayJoin));
 borrar(t2,obtener(t1,registrosDelJoin));
 if (def(t2,obtener(t1,joinPorCampoNat)))
@@ -217,19 +221,19 @@ if (def(t2,obtener(t1,joinPorCampoNat)))
 
 }
 
-Iterador(String) BaseDeDatos::tablas(){
+Iterador(string) BaseDeDatos::tablas(){
 return crearIt(tablas);
 }
 
-Tabla BaseDeDatos::dameTabla(String s){
+Tabla BaseDeDatos::dameTabla(string s){
 return obtener(s,nombreATabla);
 }
 
-bool BaseDeDatos::hayJoin(String s1,String s2){
+bool BaseDeDatos::hayJoin(string s1,string s2){
 return def(s2,obtener(s1,hayJoin));
 }
 
-String BaseDeDatos::campoJoin(String s1, String s2){
+string BaseDeDatos::campoJoin(string s1, string s2){
 
 return (obtener(s2,obtener(s1,hayJoin))).campoJoin;
 }
@@ -247,11 +251,11 @@ Registro Merge(Registro r1, Registro r2){
 }
 
 
-Iterador(Conj(Registro)) BaseDeDatos::vistaJoin(String s1, String s2){
+Iterador(Conj(Registro)) BaseDeDatos::vistaJoin(string s1, string s2){
 //COMPLETAR!!
 }
 
-Conj(Registro) BaseDeDatos::busquedaCriterio(Registro crit,String t){
+Conj(Registro) BaseDeDatos::busquedaCriterio(Registro crit,string t){
 	//COMPLETAR!!
 }
 
@@ -259,7 +263,7 @@ bool coincidenTodosCrit(Registro crit,Registro r){
 	//COMPLETAR!!
 }
 
-String BaseDeDatos::tablaMaxima(){
+string BaseDeDatos::tablaMaxima(){
 	return (*tablaMasAccedida);
 }
 }
