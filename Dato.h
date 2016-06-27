@@ -18,9 +18,8 @@ using namespace std;
             bool operator<=(const Dato& d) const;
             bool operator>=(const Dato& d) const;
             bool operator==(const Dato& d) const;
-            ostream& operator<<(ostream& os);
-            Dato(const Dato& otro);
-
+            bool operator!=(const Dato& d) const;
+            friend ostream& operator<<(ostream& os, const Dato& d);
 
             //Interfaz
             static Dato datoString(string s)    { return Dato(false, s, 0);      };
@@ -31,8 +30,8 @@ using namespace std;
             const string& dame_valorStr() const;
 
             static bool mismoTipo(const Dato& d1,const Dato& d2);
-            static const Dato& min(Conj<const Dato&> cd);
-            static const Dato& max(Conj<const Dato&> cd);
+            static const Dato min(Conj<const Dato&> cd);
+            static const Dato max(Conj<const Dato&> cd);
 
         private:
             // Campos
@@ -62,12 +61,11 @@ using namespace std;
     	return !(nat);
     }
 
-
-    bool mismoTipo(Dato d1,Dato d2){
-    	return d1.esNat()==d2.esNat();
+    bool mismoTipo(const Dato& d1,const Dato& d2){
+      return d1.esNat()==d2.esNat();
     }
 
-    const Dato& min(Conj<Dato> c){
+    const Dato min(Conj<Dato> c){
     	Conj<Dato>::Iterador it = c.CrearIt();
     	Dato minimo = it.Siguiente();
     	while(it.HaySiguiente()){
@@ -80,7 +78,7 @@ using namespace std;
     }
 
 
-    const Dato& max(Conj<Dato> c){
+    const Dato max(Conj<Dato> c){
       Conj<Dato>::Iterador it = c.CrearIt();
       Dato maximo = it.Siguiente();
       while(it.HaySiguiente()){
@@ -128,12 +126,22 @@ using namespace std;
     	if (mismoTipo(*this, otro)){
     		if (this->esNat()){
     			return (this->valorNat == otro.valorNat);
-    		}else{
+    		} else {
     			return (this->valorStr == otro.valorStr);
     		}
     	}else{
     		return false;
     	}
+    }
+
+    bool Dato::operator!=(const Dato& otro) const{
+      return !(*this == otro);
+    }
+
+    ostream& operator<<(ostream& os, const Dato& d){
+      d.esNat()?  os << d.valorNat << endl:
+                  os << d.valorStr << endl;
+      return os;
     }
 
 
