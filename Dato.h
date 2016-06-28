@@ -30,8 +30,8 @@ using namespace std;
             const string& dame_valorStr() const;
 
             static bool mismoTipo(const Dato& d1,const Dato& d2);
-            static const Dato min(Conj<const Dato&> cd);
-            static const Dato max(Conj<const Dato&> cd);
+            static const Dato min(const Conj<Dato>& cd);
+            static const Dato max(const Conj<Dato>& cd);
 
         private:
             // Campos
@@ -65,8 +65,8 @@ using namespace std;
       return (d1.esNat()==d2.esNat());
     };
 
-    const Dato min(Conj<Dato> c){
-    	Conj<Dato>::Iterador it = c.CrearIt();
+     const Dato min(const Conj<Dato>& cd){
+    	Conj<Dato>::const_Iterador it = cd.CrearIt();
     	Dato minimo = it.Siguiente();
     	while(it.HaySiguiente()){
     		if ( it.Siguiente() <= minimo ){
@@ -78,8 +78,8 @@ using namespace std;
     }
 
 
-    const Dato max(Conj<Dato> c){
-      Conj<Dato>::Iterador it = c.CrearIt();
+     const Dato Dato::max(const Conj<Dato>& cd){
+      Conj<Dato>::const_Iterador it = cd.CrearIt();
       Dato maximo = it.Siguiente();
       while(it.HaySiguiente()){
       	if ( it.Siguiente() > maximo ){

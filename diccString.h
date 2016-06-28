@@ -2,7 +2,9 @@
 #define diccString_H_INCLUDED
 
 #include <string>
-#include "TiposBasicos.h"
+#include "aed2.h"
+#include <cassert>
+#include <iostream>
 template<class Significado>
 class diccString {
 
@@ -11,7 +13,7 @@ public:
 	/**
 	 * Crea un dicc vacio.
 	 */
-	vacio();
+	public diccString();
 	/**
 	 * define un string,significado en el dicc.
 	 */
@@ -25,7 +27,12 @@ public:
 	diccString(const diccString& otro);
 
 private:
-	trie nodoTrie;list(<String clave,Significado significado>) valores;
+    struct tup{
+      string clave;
+      Significado significado;
+    };
+	trie nodoTrie;
+        Lista<tup> valores;
 	struct trie {
 		Iterador* valor;
 		Array<trie*> hijos;
@@ -38,7 +45,7 @@ bool operator==(const diccString& d1, const diccString<T>& d2);
 template<class Significado>
 std::ostream& operator<<(std::ostream& os, const diccString& d);
 
-diccString::vacio() :
+diccString::diccString() :
 	nodoTrie(new trie), valores(It(new List)) {
 }
 
