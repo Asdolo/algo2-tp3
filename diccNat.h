@@ -12,13 +12,14 @@ using namespace std;
 
 template<class Significado>
 struct tuplaDicc{
-  unsigned int& clave;
+  unsigned int clave;
   const Significado& significado;
 };
 
 template<class Significado>
 class diccNat{
     public:
+      class Iterador;
       diccNat();
 
       void definir(unsigned int clave, const Significado& significado);
@@ -27,16 +28,17 @@ class diccNat{
       void borrar(unsigned int clave);
       tuplaDicc<Significado> min() const;
       tuplaDicc<Significado> max() const;
-      Iterador crearIt();
+      Iterador crearIt() const;
 
       class Iterador{
         public:
-          Lista<tuplaDicc<Significado>> siguientes() const;
-          Iterador avanzar();
+          Lista<tuplaDicc<Significado> > siguientes() const;
+          void avanzar();
           bool hayMas() const;
           tuplaDicc<Significado> actual() const;
 
         private:
+          struct nodoDiccNat;
           Pila<nodoDiccNat*> iter;
 
           Iterador();
@@ -46,13 +48,14 @@ class diccNat{
 
     private:
       struct nodoDiccNat{
+        nodoDiccNat(unsigned int k, Significado* s)
+        : clave(k), significado(s), izq(NULL), der(NULL) {};
+
         unsigned int clave;
         Significado* significado;
         nodoDiccNat* izq;
         nodoDiccNat* der;
       };
-      nodoDiccNat(unsigned int k, Significado* s)
-      	: clave(k), signficado(s), izq(NULL), der(NULL) {};
       nodoDiccNat* estr;
 };
 
@@ -63,28 +66,28 @@ class diccNat{
 
 template<class Significado>
 diccNat<Significado>::diccNat()
- : estr(NULL);
+ : estr(NULL) {};
 
 template<class Significado>
 void diccNat<Significado>::definir(unsigned int clave, const Significado& significado){
-	nodoDiccNat<Significado>* diccAux = this->estr;
+	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
 	while (!termine) {
 		if (diccAux == NULL) {
-			diccAux = new nodoDiccNat(n, &s);
+			diccAux = new nodoDiccNat(clave, &significado);
 		} else {
-			if (diccAux->clave > n) {
+			if (diccAux->clave >clave) {
 				if (diccAux->izq != NULL) {
 					diccAux = (diccAux->izq);
 				} else {
-					(diccAux->izq) = new nodoDiccNat(n, &s);
+					(diccAux->izq) = new nodoDiccNat(clave, &significado);
 					termine = true;
 				}
 			} else {
 				if (diccAux->der != NULL) {
 					diccAux = (diccAux->der);
 				} else {
-					(diccAux->der) = new nodoDiccNat(n, &s);
+					(diccAux->der) = new nodoDiccNat(clave, &significado);
 					termine = true;
 				}
 			}
@@ -94,18 +97,19 @@ void diccNat<Significado>::definir(unsigned int clave, const Significado& signif
 
 template<class Significado>
 bool diccNat<Significado>::def(unsigned int clave) const{
-	nodoDiccNat<Significado>* diccAux = this->estr;
+	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
+  bool res;
 	while (!termine){
 		if (diccAux == NULL) {
-			bool res = false;
+			res = false;
 			termine = true;
 		} else {
-			if (diccAux->clave == n) {
+			if (diccAux->clave ==clave) {
 				termine = true;
 				res = true;
 			} else {
-				if (diccAux->clave > n) {
+				if (diccAux->clave >clave) {
 					diccAux = (diccAux->izq);
 				} else {
 					diccAux = (diccAux->der);
@@ -118,13 +122,14 @@ bool diccNat<Significado>::def(unsigned int clave) const{
 
 template<class Significado>
 const Significado& diccNat<Significado>::obtener(unsigned int clave) const{
-	nodoDiccNat<Significado>* diccAux = this->estr;
+	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
+  bool res;
 	while (!termine) {
-		if (diccAux->clave > n) {
+		if (diccAux->clave >clave) {
 			diccAux = diccAux->izq;
 		} else {
-			if (diccAux->clave == n) {
+			if (diccAux->clave ==clave) {
 				res = diccAux->significado;
 				termine = true;
 			} else {
@@ -137,15 +142,15 @@ const Significado& diccNat<Significado>::obtener(unsigned int clave) const{
 
 template<class Significado>
 void diccNat<Significado>::borrar(unsigned int clave){
-	nodoDiccNat<Significado>* diccAux = this->estr;
+	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
-	nodoDiccNat<Significado>* padre = NULL;
+	nodoDiccNat* padre = NULL;
 	while (!termine) {
-		if (diccAux->clave < n) {
+		if (diccAux->clave <clave) {
 			padre = diccAux;
 			diccAux = diccAux->izq;
 		} else {
-			if (diccAux->clave == n) {
+			if (diccAux->clave ==clave) {
 				termine = true;
 			} else {
 				padre = diccAux;
@@ -189,7 +194,7 @@ void diccNat<Significado>::borrar(unsigned int clave){
 
 template<class Significado>
 tuplaDicc<Significado> diccNat<Significado>::min() const{
-	nodoDiccNat<Significado>* diccAux = this->estr;
+	nodoDiccNat* diccAux = this->estr;
 	while (diccAux->izq != NULL) {
 		diccAux = (diccAux->izq);
 	}
@@ -198,7 +203,7 @@ tuplaDicc<Significado> diccNat<Significado>::min() const{
 
 template<class Significado>
 tuplaDicc<Significado> diccNat<Significado>::max() const{
-	nodoDiccNat<Significado>* diccAux = this->estr;
+	nodoDiccNat* diccAux = this->estr;
 	while (diccAux->der != NULL) {
 		diccAux = (diccAux->der);
 	}
@@ -212,19 +217,20 @@ tuplaDicc<Significado> diccNat<Significado>::max() const{
 */
 
 template<class Significado>
-class diccNat<Significado>::Iterador diccNat<Significado>::crearIt(){
+class diccNat<Significado>::Iterador diccNat<Significado>::crearIt() const{
   return Iterador(this);
 }
 
 template<class Significado>
-Lista<tuplaDicc<Significado>> diccNat<Significado>::Iterador::siguientes(){
-  Lista<tuplaDicc<Significado>> res;
+Lista<tuplaDicc<Significado> > diccNat<Significado>::Iterador::siguientes() const{
+  Lista<tuplaDicc<Significado> > res;
   Iterador it;
   it.iter = this->iter;
-  while (! it.iter.esVacia(){
+  while (! it.iter.esVacia()){
     nodoDiccNat* prox = it.iter.desapilar();
     Significado copia = prox->significado;
-    res.AgregarAtras({prox->clave, *copia});
+    tuplaDicc<Significado> tuplaAg = {prox->clave, *copia};
+    res.AgregarAtras(tuplaAg);
     if (prox->der != NULL) {
       it.iter.apilar(prox->der);
     }
@@ -247,23 +253,24 @@ void diccNat<Significado>::Iterador::avanzar(){
 }
 
 template<class Significado>
-bool diccNat<Significado>::Iterador::hayMas(){
+bool diccNat<Significado>::Iterador::hayMas() const{
   return !iter.esVacia();
 }
 
 template<class Significado>
-tuplaDicc<Significado> diccNat<Significado>::Iterador::actual(){
-  return { iter.tope()->clave, *(iter.tope()->significado) };
+tuplaDicc<Significado> diccNat<Significado>::Iterador::actual() const{
+  tuplaDicc<Significado> res = { iter.tope()->clave, *(iter.tope()->significado) };
+  return res;
 }
 
 template<class Significado>
-diccNat<Significado>::Iterador::Iterador() : iter(Pila()) {}
+diccNat<Significado>::Iterador::Iterador() : iter(Pila<nodoDiccNat*>()) {}
 
 template<class Significado>
 diccNat<Significado>::Iterador::Iterador(diccNat<Significado>* dicc){
-  this->iter = Pila();
+  this->iter = Pila<nodoDiccNat*>();
   if (dicc != NULL) {
-    (this->iter).Apilar()
+    (this->iter).apilar();
   }
 }
 
