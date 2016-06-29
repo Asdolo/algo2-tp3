@@ -13,10 +13,7 @@ using namespace std;
 
 template<class Significado>
 struct tupString {
-    tupString(string cla, const Significado& sign){
-        clave = cla;
-        significado = sign;
-    }
+    tupString(string cla, const Significado& sign) : clave(cla), significado(sign) {};
     string clave;
     const Significado& significado;
 };
@@ -44,12 +41,11 @@ private:
 
     struct Trie {
         class Lista<struct tupString<Significado> >::Iterador* valor;
-        Lista<Trie*> hijos;
+        Trie* hijos[256];
         unsigned int cantHijos;
     };
     Trie nodoTrie;
     Lista<class tupString<Significado> > valores;
-
 
 };
 
@@ -85,9 +81,7 @@ diccString<Significado>::~diccString(){
 template<class Significado>
 void diccString<Significado>::definir(string clave, const Significado& significado) {
 
-    tupString<Significado> entrada;
-    entrada.clave=clave;
-    entrada.significado=significado;
+    tupString<Significado> entrada = tupString<Significado>(clave, significado);
     class Lista<tupString<Significado> >::Iterador iter = valores.AgregarAdelante(entrada);
     Trie* actual = &(this->nodoTrie);
 
@@ -104,7 +98,7 @@ void diccString<Significado>::definir(string clave, const Significado& significa
 
 template<class Significado>
 bool diccString<Significado>::def(string clave) const {
-    Trie* actual = &(this->nodoTrie);
+    const Trie* actual = &(this->nodoTrie);
     bool res = true;
     int i = 0;
 
@@ -127,12 +121,15 @@ bool diccString<Significado>::def(string clave) const {
 
 template<class Significado>
 const Significado& diccString<Significado>::obtener(string clave) const {
-    const Significado& res;
-    Trie* actual = &(this->nodoTrie);
+    const Trie* actual = &(this->nodoTrie);
+    cout << clave << endl;
+    cout << "Longitud: " << clave.length() << endl;
     for (int i = 0; i < clave.length(); i++) {
+        cout << "i: " << i << endl;
         actual = (actual->hijos)[clave[i]];
     }
-    res = (*(actual->valor)).Siguiente().significado;
+    cout << "Salio" << endl;
+    const Significado& res = actual->valor->Siguiente().significado;
     return res;
 }
 
@@ -159,9 +156,9 @@ void diccString<Significado>::borrar(string clave) {
         }
         actual = temp;
     }
-    *(actual->valor).EliminarSiguiente();
+    actual->valor->EliminarSiguiente();
 
-    actual->valor = NULL;
+    actual->valor   = NULL;
     actual = &(this->nodoTrie);
     int i = 0;
     while (i < clave.length() - 1 && !listo) {
@@ -182,7 +179,7 @@ class Lista<tupString<Significado> >::Iterador diccString<Significado>::vistaDic
 
 template<class Significado>
 string diccString<Significado>::min() const {
-    Trie* actual = &(this->nodoTrie);
+    const Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
     while (!termine) {
@@ -193,7 +190,7 @@ string diccString<Significado>::min() const {
             }
         } else {
             termine = true;
-            res = *(actual->valor)->Siguiente().clave;
+            res = actual->valor->Siguiente().clave;
         }
     }
     return res;
@@ -201,12 +198,12 @@ string diccString<Significado>::min() const {
 
 template<class Significado>
 string diccString<Significado>::max() const {
-    Trie* actual = &(this->nodoTrie);
+    const Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
     while (!termine) {
         if (actual->cantHijos == 0) {
-            res = *(actual->valor)->Siguiente().clave;
+            res = actual->valor->Siguiente().clave;
             termine = true;
         } else {
             int i;
@@ -228,13 +225,11 @@ string diccString<Significado>::max() const {
 /* vale para constructor por copia tambien*/
 template<class Significado>
 diccString<Significado>& diccString<Significado>::operator=(const diccString<Significado>& other) {
-    class Lista< tupString<Significado> >::Iterador it = other.valores.CrearIt();
-    diccString <Significado> res;
+    class Lista< tupString<Significado> >::const_Iterador it = other.valores.CrearIt();
     while (it.HaySiguiente()) {
-        res.definir(it.Siguiente().clave, it.Siguiente().significado);
+        this->definir(it.Siguiente().clave, it.Siguiente().significado);
         it.Avanzar();
     }
-    return res;
 }
 
 template<class Significado>
