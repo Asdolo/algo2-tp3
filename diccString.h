@@ -42,8 +42,6 @@ public:
     string max();
     //FIJARSE SI NECESITAMOS COPIAR!
     diccString(const diccString& otro);
-
-   bool operator==(const diccString<Significado>& d1);
    diccString<Significado>& operator=(const diccString<Significado>& other);
 
 private:
