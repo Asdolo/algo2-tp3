@@ -12,15 +12,17 @@ class Pila {
   public:
     Pila();
     Pila(const Pila<T>& otra);
-    ~Pila();
+    //~Pila();
     Pila<T>& operator=(const Pila<T>& otra);
 
     void apilar(const T& elem);
-    T& desapilar();
-    T& tope() const;
+    T desapilar();
+    const T& tope() const;
+    //T& desapilar();
+    //T& tope() const;
     bool esVacia() const;
 
-    template<typename Q> //Sin esto chilla, wtf
+    template<typename Q>
     friend ostream& operator<<(ostream& os, const Pila<Q>& p);
 
   private:
@@ -36,12 +38,12 @@ Pila<T>::Pila() : estr(Lista<T>()) {};
 template<typename T>
 Pila<T>::Pila(const Pila<T>& otra) : estr(otra.estr) {}
 
-template<typename T>
-Pila<T>::~Pila(){
-  while (!esVacia()){
-    desapilar();
-  }
-}
+//template<typename T>
+//Pila<T>::~Pila(){
+//  while (!esVacia()){
+//    desapilar();
+//  }
+//}
 
 template<typename T>
 Pila<T>& Pila<T>::operator=(const Pila<T>& otra){
@@ -51,18 +53,18 @@ Pila<T>& Pila<T>::operator=(const Pila<T>& otra){
 
 template<typename T>
 void Pila<T>::apilar(const T& elem){
-  estr.AgregarAtras(elem);
+  estr.AgregarAdelante(elem);
 }
 
 template<typename T>
-T& Pila<T>::desapilar(){
+T Pila<T>::desapilar(){
   T res = tope();
   estr.Fin();
   return res;
 }
 
 template<typename T>
-T& Pila<T>::tope() const{
+const T& Pila<T>::tope() const{
   return estr.Primero();
 }
 
