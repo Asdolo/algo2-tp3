@@ -1,17 +1,22 @@
 #ifndef TABLA_H_INCLUDED
 #define TABLA_H_INCLUDED
 #include "diccString.h"
-#define Registro diccString<Dato>
 #include "aed2.h"
 #include <cassert>
 #include <string>
 #include <iostream>
-
+#include "Dato.h"
+#define Registro diccString<Dato>
 
 using namespace std;
 
 class Tabla {
 public:
+
+	Tabla(string nombre, Conj<string> claves, Registro columnas);
+	agregarRegistro(Registro r);
+    borrarRegistro(Registro cr);
+    indexar(string c);
     string nombre();
     Conj<string>::Iterador claves();
     Lista<Registro> buscar(string campo, Dato d);
@@ -20,10 +25,6 @@ public:
     bool tipoCampo(string campo);
     Conj<Registro> registros();
     unsigned int cantidadDeAccesos();
-    Tabla(string nombre, Conj<string> claves, Registro columnas);
-    agregarRegistro(Registro r);
-    borrarRegistro(Registro cr);
-    indexar(string c);
     Dato minimo(string campo);
     Dato maximo(string campo);
 
@@ -35,8 +36,8 @@ private:
         Dato min;
         bool vacio;
     };
-    diccString<Conj<Iterador(Conj<Registro>) >> _indicesString;
-    diccNat<Conj<Iterador<Conj<Registro>>>> _indicesNat;
+    diccString<Conj<Conj<Registro>::Iterador> > _indicesString;
+	diccNat<Conj<Conj<Registro>::Iterador> > _indicesNat;
     string _nombre;
     diccString<bool> _campos;
     Conj<string> _claves;
@@ -48,20 +49,20 @@ private:
 };
 
 Tabla::Tabla(string nombre, Conj<string> claves, Registro columnas) {
-    _indicesString = diccString();
-    _indicesNat = diccNat();
-    _registros = Conj();
+    _indicesString = diccString<Conj<Conj<Registro>::Iterador> >();
+    _indicesNat = diccNat<Conj<Conj<Registro>::Iterador> >();
+    _registros = Conj<Registro>();
     _nombre = nombre;
-    _campos = diccString();
-    _claves = Conj(claves);
-    _campoIndexadoNat = Lista<Tupla>;
-    _campoIndexadoString = Lista<Tupla>;
+    _campos = diccString<bool>();
+    _claves = Conj<claves>();
+    _campoIndexadoNat = Lista<Tupla>();
+    _campoIndexadoString = Lista<Tupla>();
     _cantAccesos = 0;
-    diccString::Iterador iter = columnas.vistaDicc();
-    while (iter.hayMas()) {
+    Lista<Registro>::Iterador iter = columnas.vistaDicc();
+    while (iter.HaySiguiente()) {
         //REVISAR EN PDF LE FALTA A QUE DICC SE DEFINE
         definir(iter.siguiente().clave, nat(iter.Siguiente().significado, campos));
-        iter.avanzar();
+        iter.Avanzar();
     }
 
 }
@@ -101,48 +102,48 @@ unsigned int Tabla::cantidadDeAccesos() {
     return _cantAccesos;
 }
 
-void Tabla::borrarRegistro(Registro criterio) {
-    diccString::Iterador it = criterio.vistaDicc();
-    ? ? ? clave = it.Siguiente().clave;
+ Tabla::borrarRegistro(Registro cr) {
+    Registro::Iterador it = cr.vistaDicc();
+    string clave = it.Siguiente().clave;
     Dato dato = it.actual().significado;
 
-    if (_campoIndexadoNat.Primero().nombre == clave) {
+    if (_campoIndexadoNat.Primero().campo == clave) {
         if (_indicesNat.def(dato.valorNat())) {
-            Iterador iterador = ::CrearIt(_indicesNat.obtener(dato.valorNat()));
+            Conj<Conj<Registro>::Iterador>::Iterador iterador = _indicesNat.obtener(dato.valorNat()).CrearIt();
             iterador.Siguiente().EliminarSiguiente();
             _cantAccesos++;
             _indicesNat.borrar(dato.valorNat());
-            Iterador temp = ::CrearIt(_indicesNat);
+            diccNat<Conj<Conj<Registro>::Iterador> >::Iterador temp = _indicesNat.CrearIt();
             if (!temp.HaySiguiente()) {
-                _campoIndexadoNat.primero().vacio = true;
+                _campoIndexadoNat.Primero().vacio = true;
             } else {
-                if (dato.valorNat() == _campoIndexadoNat.primero().max) {
-                    _campoIndexadoNat.primero().max
+                if (dato.valorNat() == _campoIndexadoNat.Primero().max) {
+                    _campoIndexadoNat.Primero().max
                             = _indicesNat.maximo().fst().datoNat();
                 }
-                if (dato.valorNat() == _campoIndexadoNat.primero().min) {
-                    _campoIndexadoNat.primero().min
+                if (dato.valorNat() == _campoIndexadoNat.Primero().min) {
+                    _campoIndexadoNat.Primero().min
                             = _indicesNat.minimo().fst().datoNat();
                 }
             }
         }
 
-    } else if (_campoIndexadoString.primero().nombre == clave) {
+    } else if (_campoIndexadoString.Primero().campo == clave) {
         if (_indicesString.def(dato.valorString())) {
-            Iterador iterador = ::CrearIt(_indicesString.obtener(valorString()));
+            Conj<Conj<Registro>::Iterador>::Iterador iterador = _indicesString.obtener(valorString()).CrearIt();
             iterador.Siguiente().EliminarSiguiente();
             _cantAccesos++;
             _indicesString.borrar(dato.valorString());
-            Iterador temp = ::CrearIt(_indicesString);
+            diccString<Conj<Conj<Registro>::Iterador> >::Iterador temp = _indicesString.CrearIt();
             if (!temp.HaySiguiente()) {
-                _campoIndexadoString.primero().vacio = true;
+                _campoIndexadoString.Primero().vacio = true;
             } else {
-                if (dato = _campoIndexadoString.primero().max) {
-                    _campoIndexadoString.primero().max
+                if (dato = _campoIndexadoString.Primero().max) {
+                    _campoIndexadoString.Primero().max
                             = Maximo(_indicesString).fst().datoString();
                 }
-                if (dato = _campoIndexadoString.primero().min) {
-                    _campoIndexadoString.primero().min
+                if (dato = _campoIndexadoString.Primero().min) {
+                    _campoIndexadoString.Primero().min
                             = minimo(_indicesString).fst().datoString();
                 }
 
@@ -151,12 +152,12 @@ void Tabla::borrarRegistro(Registro criterio) {
         }
 
     } else {
-        Iterador iter = Registro::CrearIt(registros);
+        Conj<Registro>::Iterador iter = _registros.CrearIt();
         while (iter.HaySiguiente()) {
             if (iter.Siguiente.obtener(clave) == dato) {
                 if (!_campoIndexadoNat.vacia()) {
                     Registro regi = iter.Siguiente();
-                    ? ? valorIndex = regi.obtener(_campoIndexadoNat.primero().nombre).valorNat();
+                    unsigned int valorIndex = regi.obtener(_campoIndexadoNat.Primero().campo).valorNat();
                     ? ? conjIters = _indicesNat.obtener(valorIndex);
                     ? ? itDeIters = ::CrearIt(conjIters);
                     while (itDeIters.HaySiguiente()) {
@@ -169,7 +170,7 @@ void Tabla::borrarRegistro(Registro criterio) {
                 } else if (!_campoIndexadoString.vacia()) {
 
                     Registro regi = iter.Siguiente();
-                    ? ? valorIndex = regi.obtener(_campoIndexadoString.primero().nombre).valorString();
+                    string valorIndex = regi.obtener(_campoIndexadoString.Primero().campo).valorString();
                     ? ? conjIters = _indicesString.obtener(valorIndex);
                     ? ? itDeIters = ::CrearIt(conjIters);
                     while (itDeIters.HaySiguiente()) {
@@ -189,27 +190,27 @@ void Tabla::borrarRegistro(Registro criterio) {
     }
 }
 
-void Tabla::agregarRegistro(Registro r) {
+ Tabla::agregarRegistro(Registro r) {
     cantAccesos++;
-    Iterador it = registros.agregarRapido(r);
+    Conj<Registro>::Iterador it = registros.agregarRapido(r);
     if (!_campoIndexadoNat.vacia()) {
-        if (_campoIndexadoNat.primero().vacio) {
-            _campoIndexadoNat.primero().min = r.obtener(
-                    _campoIndexadoNat.primero());
-            _campoIndexadoNat.primero().max = (_campoIndexadoNat.primero()).min; //REVISAR LINEA!
-            _campoIndexadoNat.primero().vacio = false;
+        if (_campoIndexadoNat.Primero().vacio) {
+            _campoIndexadoNat.Primero().min = r.obtener(
+                    _campoIndexadoNat.Primero());
+            _campoIndexadoNat.Primero().max = (_campoIndexadoNat.Primero()).min; //REVISAR LINEA!
+            _campoIndexadoNat.Primero().vacio = false;
 
         } else {
             unsigned int nPaMinMax = r.obtener(
-                    _campoIndexadoNat.primero().nombre);
-            if (nPaMinMax > _campoIndexadoNat.primero().min) {
-                _campoIndexadoNat.primero().min = nPaMinMax;
+                    _campoIndexadoNat.Primero().campo);
+            if (nPaMinMax > _campoIndexadoNat.Primero().min) {
+                _campoIndexadoNat.Primero().min = nPaMinMax;
             }
-            if (nPaMinMax > _campoIndexadoNat.primero().max) {
-                _campoIndexadoNat.primero().max = nPaMinMax;
+            if (nPaMinMax > _campoIndexadoNat.Primero().max) {
+                _campoIndexadoNat.Primero().max = nPaMinMax;
             }
         }
-        ? ? aux = r.obtener(_campoIndexadoNat.primero());
+        Dato aux = r.obtener(_campoIndexadoNat.Primero());
         if (_indicesNat.def(aux)) {
             _indicesNat.obtener(aux).agregarRapido(it);
         } else {
@@ -218,23 +219,23 @@ void Tabla::agregarRegistro(Registro r) {
     }
 
     if (!_campoIndexadoString.vacia()) {
-        if (_campoIndexadoString.primero().vacio) {
-            _campoIndexadoString.primero().min = r.obtener(
-                    _campoIndexadoString.primero());
-            _campoIndexadoString.primero().max
-                    = (_campoIndexadoString.primero()).min; //REVISAR LINEA!
-            _campoIndexadoString.primero().vacio = false;
+        if (_campoIndexadoString.Primero().vacio) {
+            _campoIndexadoString.Primero().min = r.obtener(
+                    _campoIndexadoString.Primero());
+            _campoIndexadoString.Primero().max
+                    = (_campoIndexadoString.Primero()).min; //REVISAR LINEA!
+            _campoIndexadoString.Primero().vacio = false;
 
         } else {
-            string sPaMinMax = r.obtener(_campoIndexadoString.primero().nombre);
-            if (sPaMinMax > _campoIndexadoString.primero().min) {
-                _campoIndexadoString.primero().min = sPaMinMax;
+            string sPaMinMax = r.obtener(_campoIndexadoString.Primero().campo);
+            if (sPaMinMax > _campoIndexadoString.Primero().min) {
+                _campoIndexadoString.Primero().min = sPaMinMax;
             }
-            if (sPaMinMax > _campoIndexadoString.primero().max) {
-                _campoIndexadoString.primero().max = sPaMinMax;
+            if (sPaMinMax > _campoIndexadoString.Primero().max) {
+                _campoIndexadoString.Primero().max = sPaMinMax;
             }
         }
-        ? ? aux = r.obtener(_campoIndexadoString.primero());
+        Dato aux = r.obtener(_campoIndexadoString.Primero());
         if (_indicesString.def(aux)) {
             _indicesString.obtener(aux).agregarRapido(it);
         } else {
@@ -244,15 +245,15 @@ void Tabla::agregarRegistro(Registro r) {
 
 }
 
-void Tabla::indexar(string c) {
+ Tabla::indexar(string c) {
     if (this.tipoCampo(c)) {
         Dato dato = Dato::DatoNat(0);
         _campoIndexadoNat.agregarAdelante(Tupla(c, dato, dato, true));
-        Iterador it = ::CrearIt(registros);
+        Conj<Registro>::Iterador it = _registros.CrearIt();
         if (it.HaySiguiente()) {
-            _campoIndexadoNat.primero().vacio = false;
-            _campoIndexadoNat.primero().max = it.Siguiente().obtener(c);
-            _campoIndexadoNat.primero().min = it.Siguiente().obtener(c);
+            _campoIndexadoNat.Primero().vacio = false;
+            _campoIndexadoNat.Primero().max = it.Siguiente().obtener(c);
+            _campoIndexadoNat.Primero().min = it.Siguiente().obtener(c);
         }
         while (it.HaySiguiente()) {
             unsigned int temp = it.Siguiente().obtener(c).valorNat();
@@ -260,11 +261,11 @@ void Tabla::indexar(string c) {
                 _indicesNat.definir(temp, ::vacio());
             }
             _indicesNat.obtener(temp).agregarRapido(it);
-            if (it.Siguiente().obtener(c) > _campoIndexadoNat.primero().max) {
-                _campoIndexadoNat.primero().max = it.siguiente().obtener(c);
+            if (it.Siguiente().obtener(c) > _campoIndexadoNat.Primero().max) {
+                _campoIndexadoNat.Primero().max = it.siguiente().obtener(c);
             }
-            if (it.siguiente().obtener(c) < _campoIndexadoNat.primero().min) {
-                _campoIndexadoNat.primero().min = it.Siguiente().obtener(c);
+            if (it.siguiente().obtener(c) < _campoIndexadoNat.Primero().min) {
+                _campoIndexadoNat.Primero().min = it.Siguiente().obtener(c);
             }
             it.Avanzar();
 
@@ -273,11 +274,11 @@ void Tabla::indexar(string c) {
     } else {
         Dato dato = Dato::datoString("temp");
         _campoIndexadoString.agregarAdelante(Tupla(c, dato, dato, true));
-        Iterador it = ::CrearIt(registros);
+        Conj<Registro>::Iterador it = _registros.CrearIt();
         if (it.HaySiguiente()) {
-            _campoIndexadoString.primero().vacio = false;
-            _campoIndexadoString.primero().max = it.Siguiente().obtener(c);
-            _campoIndexadoString.primero().min = it.Siguiente().obtener(c);
+            _campoIndexadoString.Primero().vacio = false;
+            _campoIndexadoString.Primero().max = it.Siguiente().obtener(c);
+            _campoIndexadoString.Primero().min = it.Siguiente().obtener(c);
         }
 
         while (it.HaySiguiente()) {
@@ -286,11 +287,11 @@ void Tabla::indexar(string c) {
                 _indicesString.definir(temp, ::vacio());
             }
             _indicesString.obtener(temp).agregarRapido(it);
-            if (it.Siguiente().obtener(c) > _campoIndexadoString.primero().max) {
-                _campoIndexadoString.primero().max = it.siguiente().obtener(c);
+            if (it.Siguiente().obtener(c) > _campoIndexadoString.Primero().max) {
+                _campoIndexadoString.Primero().max = it.siguiente().obtener(c);
             }
-            if (it.siguiente().obtener(c) < _campoIndexadoString.primero().min) {
-                _campoIndexadoString.primero().min = it.Siguiente().obtener(c);
+            if (it.siguiente().obtener(c) < _campoIndexadoString.Primero().min) {
+                _campoIndexadoString.Primero().min = it.Siguiente().obtener(c);
             }
             it.Avanzar();
 
@@ -300,56 +301,56 @@ void Tabla::indexar(string c) {
 }
 
 Lista<Registro> Tabla::buscar(string c, Dato d) {
-    Lista res = Lista::vacia();
-    if (d.esNat) {
-        if (_campoIndexadoNat.primero().nombre = c) {
+    Lista<Registro> res;
+    if (d.esNat()) {
+        if (_campoIndexadoNat.Primero().campo = c) {
             if (_indicesNat.def(d.valorNat())) {
-                Iterador itConjIts = _indicesNat.obtener(d.valorNat())::CrearIt();
+                Conj< Conj<Registro>::Iterador >::Iterador itConjIts = _indicesNat.obtener(d.valorNat()).CrearIt();
                 while (itConjIts.HaySiguiente()) {
-                    res.agregarAtras(itConjIts.Siguiente().Siguiente());
+                    res.AgregarAtras(itConjIts.Siguiente().Siguiente());
                     itConjIts.Avanzar();
                 }
             }
         } else {
-            if (_campoIndexadoString.primero().nombre = c) {
+            if (_campoIndexadoString.Primero().campo = c) {
                 if (_indicesString.def(d.valorString())) {
-                    Iterador itConjIts = _indicesNat.obtener(d.valorNat())::CrearIt();
-                    while (itConjIts.HaySiguiente()) {
-                        res.agregarAtras(itConjIts.Siguiente().Siguiente());
-                        itConjIts.Avanzar();
+                    Conj< Conj<Registro>::Iterador >::Iterador itConjIts2 = _indicesString.obtener(d.valorNat()).CrearIt();
+                    while (itConjIts2.HaySiguiente()) {
+                        res.AgregarAtras(itConjIts2.Siguiente().Siguiente());
+                        itConjIts2.Avanzar();
                     }
                 }
 
 
 
             } else {
-                Iterador it = registros.CrearIt();
+                Conj<Registro>::Iterador it = _registros.CrearIt();
                 while (it.HaySiguiente()) {
                     if (it.Siguiente().obtener(c) == d) {
-                        res.agregarAtras(it.Siguiente());
+                        res.AgregarAtras(it.Siguiente());
                     }
                     it.Avanzar();
                 }
             }
         }
     }
+}
 
     Dato Tabla::minimo(string c) {
-        Dato res;
-        if (c == _campoIndexadoNat.primero().nombre) {
-            res = _campoIndexadoNat.primero().min;
+        if (c == _campoIndexadoNat.Primero().campo) {
+            return _campoIndexadoNat.Primero().min;
         } else {
-            res = _campoIndexadoString.primero().min;
+            return _campoIndexadoString.Primero().min;
 
         }
     }
 
     Dato Tabla::maximo(string c) {
-        Dato res;
-        if (c == _campoIndexadoNat.primero().nombre) {
-            res = _campoIndexadoNat.primero().max;
+        
+        if (c == _campoIndexadoNat.Primero().campo) {
+            return _campoIndexadoNat.Primero().max;
         } else {
-            res = _campoIndexadoString.primero().max;
+            return _campoIndexadoString.Primero().max;
 
         }
     }

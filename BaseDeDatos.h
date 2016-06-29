@@ -1,12 +1,17 @@
 
 #ifndef BASEDEDATOS_H_INCLUDED
 #define BASEDEDATOS_H_INCLUDED
-#define Registro diccString<Dato>
+
 
 #include "aed2.h"
 #include <cassert>
 #include <string>
 #include <iostream>
+#include "Dato.h"
+#include "diccString.h"
+#include "Tabla.h"
+
+#define Registro diccString<Dato>
 
 using namespace std;
 
@@ -76,25 +81,25 @@ using namespace std;
 BaseDeDatos::BaseDeDatos() : tablaMasAccedida(NULL), nombreATabla(vacio()),tablas(vacia()),hayJoin(vacio()),joinPorCampoString(vacio()),joinPorCampoNat(vacio()),registrosDelJoin(vacio()) {}
 
 
-void BaseDeDatos::agregarTabla(string t){
+ BaseDeDatos::agregarTabla(Tabla t){
 	if (tablaMasAccedida==NULL || nombreATabla(*tablaMasAccedida).cantidadDeAccesos < t.cantidadDeAccesos){
 		tablaMasAccedida= &(t.nombre);
 		}
-		definir(t.nombre,t,nombreATabla);
-		AgregarRapido(t.nombre,tablas);
+		nombreATabla.definir(t.nombre,t);
+		tablas.AgregarRapido(t.nombre);
 		definir(t.nombre,vacio(),hayJoin);
 		definir(t.nombre,vacio(),joinPorCampoNat);
 		definir(t.nombre,vacio(),joinPorCampoString);
 		definir(t.nombre,vacio(),registrosDelJoin);
 }
 
-void BaseDeDatos::insertarEntrada(){
-	Tabla tabla = obtener(t,nombreATabla);
+ BaseDeDatos::insertarEntrada(Registro r, string s){
+	Tabla tabla = obtener(s,nombreATabla);
 	tabla.agregarRegistro(r);
 	Tabla tabMax = obtener(*(tablaMasAccedida),nombreATabla);
 	if (tabla.cantidadDeAccesos>tabMax.cantidadDeAccesos)
 	{
-		tablaMasAccedida = &t;
+		tablaMasAccedida = &s;
 	}
 Iterador iter = vistaDicc(obtener(t,hayJoin));
 
@@ -113,7 +118,7 @@ while(iter.haySiguiente()){
 }
 }
 
-void BaseDeDatos::borrar(Registro cr, string t){
+ BaseDeDatos::Borrar(Registro cr, string t){
 	Tabla tabla = obtener(t,nombreATabla);
 	t.borrarRegistro(cr);
 	Tabla tabMax = obtener(*(tablaMasAccedida),nombreATabla);
