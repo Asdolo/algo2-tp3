@@ -21,9 +21,11 @@ class diccNat{
     public:
       class Iterador;
       diccNat();
+      ~diccNat();
       template<class S>
       friend ostream& operator<<(ostream& os, const diccNat<S>& d);
 
+      //DEFINE CON REFERENCIA EN SIGNIFICADO, NO SE PUEDE DEFINIR USANDO CONSTANTES NI VARIABLES LOCALES (PASAN A SER BASURA CUANDO TERMINA EL SCOPE)
       void definir(unsigned int clave, const Significado& significado);
       bool def(unsigned int clave) const;
       const Significado& obtener(unsigned int clave) const;
@@ -70,6 +72,16 @@ diccNat<Significado>::diccNat()
  : estr(NULL) {};
 
 template<class Significado>
+diccNat<Significado>::~diccNat(){
+  int maximo = max().clave;
+  int minimo;
+  while (def(maximo)){
+    minimo = min().clave;
+    borrar(minimo);
+  }
+}
+
+template<class Significado>
 void diccNat<Significado>::definir(unsigned int clave, const Significado& significado){
   assert(!def(clave));
 	nodoDiccNat* diccAux = this->estr;
@@ -83,8 +95,6 @@ void diccNat<Significado>::definir(unsigned int clave, const Significado& signif
 				if (diccAux->izq != NULL) {
 					diccAux = (diccAux->izq);
 				} else {
-          std::cout << "padre: " << diccAux->clave << std::endl;
-          std::cout << "hijo izq: " << clave << std::endl;
 					(diccAux->izq) = new nodoDiccNat(clave, &significado);
 					termine = true;
 				}
@@ -92,8 +102,6 @@ void diccNat<Significado>::definir(unsigned int clave, const Significado& signif
 				if (diccAux->der != NULL) {
 					diccAux = (diccAux->der);
 				} else {
-          std::cout << "padre: " << diccAux->clave << std::endl;
-          std::cout << "hijo der: " << clave << std::endl;
 					(diccAux->der) = new nodoDiccNat(clave, &significado);
 					termine = true;
 				}
@@ -150,19 +158,16 @@ const Significado& diccNat<Significado>::obtener(unsigned int clave) const{
 template<class Significado>
 void diccNat<Significado>::borrar(unsigned int clave){
   assert(def(clave));
-  std::cout << endl << "Inicio de borrar... clave: " << clave << std::endl;
 	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
 	nodoDiccNat* padre = NULL;
 	while (!termine) {
-    std::cout << "Inside while" << std::endl;
 		if (clave < diccAux->clave) { //ACÁ FLASHEAMOS EN EL DISEÑO
 			padre = diccAux;
 			diccAux = diccAux->izq;
 		} else {
 			if (diccAux->clave == clave) {
 				termine = true;
-        std::cout << "Encontró el padre" << std::endl;
 			} else {
 				padre = diccAux;
 				diccAux = diccAux->der;
@@ -172,7 +177,6 @@ void diccNat<Significado>::borrar(unsigned int clave){
 
   //SE AGREGARON LOS CASOS HEAD
 	if (diccAux->izq == NULL && diccAux->der == NULL) {
-    std::cout << "Caso hoja" << std::endl;
     if (estr == diccAux){
       estr = NULL;
     } else if (padre->izq == diccAux) {
@@ -182,7 +186,6 @@ void diccNat<Significado>::borrar(unsigned int clave){
 		}
     delete diccAux;
 	} else if (diccAux->izq == NULL && diccAux->der != NULL) {
-    std::cout << "Caso hijo único der" << std::endl;
     if (estr == diccAux){
       estr = diccAux->der;
     } else if (padre->izq == diccAux) {
@@ -192,7 +195,6 @@ void diccNat<Significado>::borrar(unsigned int clave){
 		}
     delete diccAux;
 	} else if (diccAux->izq != NULL && diccAux->der == NULL) {
-    std::cout << "Caso hijo único izq" << std::endl;
     if (estr == diccAux){
       estr = diccAux->izq;
     } else if (padre->izq == diccAux) {
@@ -202,7 +204,6 @@ void diccNat<Significado>::borrar(unsigned int clave){
 		}
     delete diccAux;
 	} else if (diccAux->izq != NULL && diccAux->der != NULL) {
-    std::cout << "Caso dos hijos" << std::endl;
     diccNat<Significado> droga;
     droga.estr = diccAux->der;
 		tuplaDicc<Significado> temp = droga.min();
@@ -305,11 +306,11 @@ ostream& operator<<(ostream& os, const diccNat<Significado>& d){
   typename diccNat<Significado>::Iterador it = d.crearIt();
   os << "{ ";
   while(it.hayMas()) {
-      os << it.actual().clave;
+      os << "(" << it.actual().clave << ", " << it.actual().significado << ")";
       it.avanzar();
       if(it.hayMas()) os << ", ";
   }
-  os << "}";
+  os << " }";
   return os;
 }
 
