@@ -13,6 +13,10 @@ using namespace std;
 
 template<class Significado>
 struct tupString {
+    tupString(string cla, Significado sign){
+        clave = cla;
+        significado = sign;
+    }
     string clave;
     Significado significado;
 };
@@ -21,7 +25,6 @@ template<class Significado>
 class diccString {
 public:
 
-    class Iterador;
     /**
      * Crea un dicc vacio.
      */
@@ -29,60 +32,59 @@ public:
     /**
      * define un string,significado en el dicc.
      */
-    definir(string clave, Significado significado);
+    void definir(string clave, Significado significado);
     bool def(string clave);
     Significado obtener(string clave);
     Conj<string> claves();
-    borrar(string clave);
-    Iterador vistaDicc();
+    void borrar(string clave);
+    Lista<typename tupString<Significado> >::Iterador vistaDicc();
     string min();
     string max();
     //FIJARSE SI NECESITAMOS COPIAR!
     diccString(const diccString& otro);
 
-    class Iterador {
-    public:
-        Lista<tuplaDicc<Significado> > siguientes() const;
-        void avanzar();
-        bool hayMas() const;
-        tuplaDicc<Significado> actual() const;
-
-    private:
-    };
+   
 
 private:
 
-    trie nodoTrie;
-    Lista<tupString> valores;
-
-    struct trie {
+    struct Trie {
         Iterador* valor;
-        Lista<trie*> hijos;
+        Lista<Trie*> hijos;
         unsigned int cantHijos;
     };
-};
+    Trie nodoTrie;
 
-bool operator==(const diccString& d1, const diccString& d2);
+    Lista<class tupString<Significado> > valores;
+
+
+};
+template<class Significado>
+bool operator==(const diccString<Significado>& d1, const diccString<Significado>& d2);
 
 template<class Significado>
-std::ostream& operator<<(std::ostream& os, const diccString& d);
+std::ostream& operator<<(std::ostream& os, const diccString<Significado>& d);
 
-diccString::diccString() :
-nodoTrie(new trie), valores(Lista<tupString>) {
+template<class Significado>
+diccString<Significado>::diccString(){
+    nodoTrie =  Trie();
+                //CREO QUE NO HACE FALTA, SI LO PONGO CHILLA IGUAL
+    //valores = Lista<tupString<Significado>>();
 }
 
 template<class Significado>
 void diccString<Significado>::definir(string clave, Significado significado) {
 
-    tupString entrada;
-    entrada.clave = clave;
-    entrada.significado = significado;
-    Lista::Iterador iter = (this->valores).AgregarAdelante(entrada);
-    trie* actual = &(this->nodoTrie);
+     tupString<Significado> entrada;
+     entrada.clave=clave;
+     entrada.significado=significado;
+     // MUY RARO PERO COMPILA!
+    Iterador iter = Lista<class tupString<Significado> >::Iterador.CrearIt();
+   iter = valores.AgregarAdelante(entrada);
+    Trie* actual = &(this->nodoTrie);
 
     for (int i = 0; i < clave.length(); i++) {
         if ((actual->hijos)[clave[i]] == NULL) {
-            (actual->hijos)[clave[i]] = new trie;
+            (actual->hijos)[clave[i]] = new Trie();
             (actual->cantHijos)++;
         }
         actual = (actual->hijos)[clave[i]];
@@ -93,7 +95,7 @@ void diccString<Significado>::definir(string clave, Significado significado) {
 
 template<class Significado>
 bool diccString<Significado>::def(string clave) {
-    trie* actual = &(this->nodoTrie);
+    Trie* actual = &(this->nodoTrie);
     bool res = true;
     int i = 0;
 
@@ -117,19 +119,20 @@ bool diccString<Significado>::def(string clave) {
 template<class Significado>
 Significado diccString<Significado>::obtener(string clave) {
     Significado res;
-    trie* actual = &(this->nodoTrie);
+    Trie* actual = &(this->nodoTrie);
     for (int i = 0; i < clave.length(); i++) {
         actual = (actual->hijos)[clave[i]];
     }
-    res = (*(actual->valor)).actual().significado;
+    res = (*(actual->valor)).Siguiente().significado;
     return res;
 }
 
 template<class Significado>
-Conj<string> claves() {
-    Lista::Iterador it = this->valores.CrearIt();
-    Conj <string> res;
-    while (it.HaySiguiente()) {
+Conj<string> diccString<Significado>::claves() {
+    Conj<string> res;
+    Iterador it = Lista<class tupString<Significado> >::Iterador.CrearIt();
+    it = valores.CrearIt();
+    while (it.hayMas()) {
         res.AgregarRapido(it.Siguiente().clave);
         it.Avanzar();
     }
@@ -138,17 +141,17 @@ Conj<string> claves() {
 
 template<class Significado>
 void diccString<Significado>::borrar(string clave) {
-    trie* actual = &(this->nodoTrie);
+    Trie* actual = &(this->nodoTrie);
     bool listo = false;
     for (int i = 0; i < clave.length(); i++) {
-        trie* temp = (actual->hijos)[clave[i]];
+        Trie* temp = (actual->hijos)[clave[i]];
         if (temp->cantHijos == 0) {
             delete temp;
             (actual->hijos)[clave[i]] = NULL;
         }
         actual = temp;
     }
-    *(actual->valor).eliminarSiguiente();
+    *(actual->valor).EliminarSiguiente();
 
     actual->valor = NULL;
     actual = &(this->nodoTrie);
@@ -165,13 +168,13 @@ void diccString<Significado>::borrar(string clave) {
 }
 
 template<class Significado>
-Lista::Iterador diccString<Significado>::vistaDicc() {
-    return this->valores.CrearIt();
+Lista<class tupString<Significado> >::Iterador diccString<Significado>::vistaDicc() {
+    return valores.CrearIt();
 }
 
 template<class Significado>
 string diccString<Significado>::min() {
-    trie* actual = &(this->nodoTrie);
+    Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
     while (!termine) {
@@ -182,7 +185,7 @@ string diccString<Significado>::min() {
             }
         } else {
             termine = true;
-            res = *(actual->valor)->actual().clave;
+            res = *(actual->valor)->Siguiente().clave;
         }
     }
     return res;
@@ -190,12 +193,12 @@ string diccString<Significado>::min() {
 
 template<class Significado>
 string diccString<Significado>::max() {
-    trie* actual = &(this->nodoTrie);
+    Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
     while (!termine) {
         if (actual->cantHijos == 0) {
-            res = *(actual->valor)->actual().clave;
+            res = *(actual->valor)->Siguiente().clave;
             termine = true;
         } else {
             int i;
@@ -216,11 +219,12 @@ string diccString<Significado>::max() {
 
 /* vale para constructor por copia tambien*/
 template<class Significado>
-diccString<Significado>& diccString<Significado>::operator=(const diccString<significado>& other) {
+diccString<Significado>& diccString<Significado>::operator==(const diccString<Significado>& other) {
+    Iterador it = other.valores.crearIt();
     Lista::Iterador it = other.valores.crearIt();
     diccString <Significado> res;
-    while it.haySiguiente() {
-        res.definir(it.Siguiente().clave,it.Siguiente().significado);
+    while (it.HaySiguiente()) {
+        res.definir(it.Siguiente().clave, it.Siguiente().significado);
         it.Avanzar();
     }
     return res;
