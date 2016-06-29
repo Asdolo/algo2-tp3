@@ -13,36 +13,32 @@ using namespace std;
 
 template<class Significado>
 struct tupString {
-    tupString(string cla, Significado sign){
+    tupString(string cla, const Significado& sign){
         clave = cla;
         significado = sign;
     }
     string clave;
-    Significado significado;
+    const Significado& significado;
 };
 
 template<class Significado>
 class diccString {
 public:
 
-    /**
-     * Crea un dicc vacio.
-     */
     diccString();
-    /**
-     * define un string,significado en el dicc.
-     */
-    void definir(string clave, Significado significado);
-    bool def(string clave);
-    Significado obtener(string clave);
-    Conj<string> claves();
+    ~diccString();
+
+    void definir(string clave, const Significado& significado);
+    bool def(string clave) const;
+    const Significado& obtener(string clave) const;
+    const Conj<string> claves() const;
     void borrar(string clave);
-    class Lista<struct tupString<Significado> >::Iterador vistaDicc();
-    string min();
-    string max();
-    //FIJARSE SI NECESITAMOS COPIAR!
-    diccString(const diccString& otro);
-   diccString<Significado>& operator=(const diccString<Significado>& other);
+    class Lista<struct tupString<Significado> >::Iterador vistaDicc() const;
+    string min() const;
+    string max() const;
+
+    diccString(const diccString<Significado>& other);
+    diccString<Significado>& operator=(const diccString<Significado>& other);
 
 private:
 
@@ -58,7 +54,17 @@ private:
 };
 
 template<class Significado>
-std::ostream& operator<<(std::ostream& os, const diccString<Significado>& d);
+ostream& operator<<(ostream& os, const diccString<Significado>& d){
+  class Lista<struct tupString<Significado> >::Iterador it = d.vistaDicc();
+  os << "{ ";
+  while(it.HaySiguiente()){
+    os << "(" << it.Siguiente().clave << ", " << it.Siguiente().significado << ")";
+    it.Avanzar();
+    if (it.HaySiguiente()) os << ", ";
+  }
+  os << " }" << endl;
+  return os;
+}
 
 template<class Significado>
 diccString<Significado>::diccString(){
@@ -67,13 +73,22 @@ diccString<Significado>::diccString(){
 }
 
 template<class Significado>
-void diccString<Significado>::definir(string clave, Significado significado) {
+diccString<Significado>::~diccString(){
+  string maximo = max();
+  string minimo = min();
+  while (def(maximo)){
+    minimo = min();
+    borrar(minimo);
+  }
+}
 
-     tupString<Significado> entrada;
-     entrada.clave=clave;
-     entrada.significado=significado;
-   class Lista<tupString<Significado> >::Iterador iter;
-   iter = valores.AgregarAdelante(entrada);
+template<class Significado>
+void diccString<Significado>::definir(string clave, const Significado& significado) {
+
+    tupString<Significado> entrada;
+    entrada.clave=clave;
+    entrada.significado=significado;
+    class Lista<tupString<Significado> >::Iterador iter = valores.AgregarAdelante(entrada);
     Trie* actual = &(this->nodoTrie);
 
     for (int i = 0; i < clave.length(); i++) {
@@ -88,7 +103,7 @@ void diccString<Significado>::definir(string clave, Significado significado) {
 }
 
 template<class Significado>
-bool diccString<Significado>::def(string clave) {
+bool diccString<Significado>::def(string clave) const {
     Trie* actual = &(this->nodoTrie);
     bool res = true;
     int i = 0;
@@ -111,8 +126,8 @@ bool diccString<Significado>::def(string clave) {
 }
 
 template<class Significado>
-Significado diccString<Significado>::obtener(string clave) {
-    Significado res;
+const Significado& diccString<Significado>::obtener(string clave) const {
+    const Significado& res;
     Trie* actual = &(this->nodoTrie);
     for (int i = 0; i < clave.length(); i++) {
         actual = (actual->hijos)[clave[i]];
@@ -122,10 +137,9 @@ Significado diccString<Significado>::obtener(string clave) {
 }
 
 template<class Significado>
-Conj<string> diccString<Significado>::claves() {
-    Conj<string> res;
-    class Lista<class tupString<Significado> >::Iterador it;
-    it = valores.CrearIt();
+const Conj<string> diccString<Significado>::claves() const {
+    const Conj<string> res;
+    class Lista<class tupString<Significado> >::Iterador it = valores.CrearIt();
     while (it.HaySiguiente()) {
         res.AgregarRapido(it.Siguiente().clave);
         it.Avanzar();
@@ -162,12 +176,12 @@ void diccString<Significado>::borrar(string clave) {
 }
 
 template<class Significado>
-class Lista<tupString<Significado> >::Iterador diccString<Significado>::vistaDicc() {
+class Lista<tupString<Significado> >::Iterador diccString<Significado>::vistaDicc() const {
     return valores.CrearIt();
 }
 
 template<class Significado>
-string diccString<Significado>::min() {
+string diccString<Significado>::min() const {
     Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
@@ -186,7 +200,7 @@ string diccString<Significado>::min() {
 }
 
 template<class Significado>
-string diccString<Significado>::max() {
+string diccString<Significado>::max() const {
     Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
@@ -223,6 +237,9 @@ diccString<Significado>& diccString<Significado>::operator=(const diccString<Sig
     return res;
 }
 
-
+template<class Significado>
+diccString<Significado>::diccString(const diccString<Significado>& other){
+    *this = other;
+}
 
 #endif

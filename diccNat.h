@@ -310,7 +310,7 @@ ostream& operator<<(ostream& os, const diccNat<Significado>& d){
       it.avanzar();
       if(it.hayMas()) os << ", ";
   }
-  os << " }";
+  os << " }" << endl;
   return os;
 }
 
