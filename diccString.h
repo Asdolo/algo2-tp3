@@ -107,7 +107,6 @@ void diccString<Significado>::definir(string clave, const Significado& significa
     }
     class Lista<tupString<Significado> >::Iterador* it_ptr = new class Lista<tupString<Significado> >::Iterador(it);
     actual->valor = it_ptr;
-    std::cout << valores << std::endl;
 }
 
 template<class Significado>
@@ -115,7 +114,6 @@ bool diccString<Significado>::def(string clave) const {
     const Trie* actual = &(this->nodoTrie);
     bool res = true;
     int i = 0;
-    if (this->nodoTrie.cantHijos == 0) std::cout << "DICC VACIO" << std::endl;
 
     while (i < clave.length() && res) {
         if (actual->cantHijos > 0) {
@@ -167,24 +165,24 @@ void diccString<Significado>::borrar(string clave) {
 
     bool borrar = false;
     for (int i = 0; i < clave.length(); i++) {
-        temp->cantHijos--;
-        if ( !borrar && temp->cantHijos == 0 ) {
+        if (i + 1 != clave.length() ){
+         temp->cantHijos--;
+        }
+        if ( i+1 == clave.length() ) {
+          temp->valor->EliminarSiguiente();
+          delete temp->valor;
+          temp->valor = NULL;
+        }
+        if ( !borrar && temp->cantHijos == 0 && temp->valor == NULL) {
           actual->hijos[clave[i]] = NULL;
           borrar = true;
         }
         actual = temp;
-        if ( i+1 == clave.length() ) {
-          actual->valor->EliminarSiguiente();
-          actual->valor = NULL;
-        } else {
-          temp = actual->hijos[clave[i+1]];
-        }
-        if ( borrar ) {
-          delete actual->valor;
+        temp = actual->hijos[clave[i+1]];
+        if ( borrar ){
           delete actual;
         }
     }
-    std::cout << valores << std::endl;
 }
 
 
@@ -199,7 +197,7 @@ string diccString<Significado>::min() const {
     assert(this->nodoTrie.cantHijos > 0);
     const Trie* actual = &(this->nodoTrie);
     bool termine = false;
-    bool seguir = false;
+    bool seguir;
     string res;
     while (!termine) {
         if (actual->valor == NULL) {
@@ -250,7 +248,8 @@ template<class Significado>
 diccString<Significado>& diccString<Significado>::operator=(const diccString<Significado>& other) {
     class Lista< tupString<Significado> >::const_Iterador it = other.valores.CrearIt();
     while (it.HaySiguiente()) {
-        this->definir(it.Siguiente().clave, it.Siguiente().significado);
+        Significado copia = Significado(it.Siguiente().significado);
+        this->definir(it.Siguiente().clave, copia);
         it.Avanzar();
     }
 }
