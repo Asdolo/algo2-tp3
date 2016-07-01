@@ -14,6 +14,10 @@ using namespace std;
 template<class Significado>
 struct tupString {
     tupString(string cla, Significado& sign) : clave(cla), significado(sign) {};
+    bool operator==(const tupString& other) const {                             //No sé por qué presiento que esto no debería ser necesario, pero me lo pide en tabla...
+      return (clave == other.clave && significado == other.significado);
+    }
+
     string clave;
     Significado& significado;
 };
@@ -36,6 +40,7 @@ public:
 
     diccString(const diccString<Significado>& other);
     diccString<Significado>& operator=(const diccString<Significado>& other);
+    bool operator==(const diccString<Significado>& other) const;
 
 private:
 
@@ -73,6 +78,9 @@ ostream& operator<<(ostream& os, const tupString<Significado>& t){
   os << "(" << t.clave << ", " << t.significado << ")";
   return os;
 }
+
+
+
 
 template<class Significado>
 diccString<Significado>::diccString(){
@@ -252,6 +260,11 @@ diccString<Significado>& diccString<Significado>::operator=(const diccString<Sig
         this->definir(it.Siguiente().clave, copia);
         it.Avanzar();
     }
+}
+
+template<class Significado>
+bool diccString<Significado>::operator==(const diccString<Significado>& other) const {
+    return (valores == other.valores);
 }
 
 template<class Significado>

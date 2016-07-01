@@ -113,7 +113,8 @@ void Tabla::borrarRegistro(Registro cr) {
 
     if (_campoIndexadoNat.Primero().campo == clave) {
         if (_indicesNat.def(dato.dame_valorNat())) {
-            Conj<Conj<Registro>::Iterador >::const_Iterador iterador = _indicesNat.obtener(dato.dame_valorNat()).CrearIt();
+            Conj<Conj<Registro>::Iterador > flash = _indicesNat.obtener(dato.dame_valorNat());
+            Conj<Conj<Registro>::Iterador >::Iterador iterador = flash.CrearIt();
             iterador.Siguiente().EliminarSiguiente();
             _cantAccesos++;
             _indicesNat.borrar(dato.dame_valorNat());
@@ -122,10 +123,12 @@ void Tabla::borrarRegistro(Registro cr) {
                 _campoIndexadoNat.Primero().vacio = true;
             } else {
                 if (dato.dame_valorNat() == _campoIndexadoNat.Primero().max.dame_valorNat()) {
-                    _campoIndexadoNat.Primero().max = _indicesNat.max().clave;
+                    Dato max = Dato::datoNat(_indicesNat.max().clave);
+                    _campoIndexadoNat.Primero().max = max;
                 }
                 if (dato.dame_valorNat() == _campoIndexadoNat.Primero().min.dame_valorNat()) {
-                    _campoIndexadoNat.Primero().min = _indicesNat.max().clave;
+                    Dato min = Dato::datoNat(_indicesNat.min().clave);
+                    _campoIndexadoNat.Primero().max = min;
                 }
             }
         }
@@ -137,16 +140,17 @@ void Tabla::borrarRegistro(Registro cr) {
             _cantAccesos++;
             _indicesString.borrar(dato.dame_valorStr());
             //NO HAY ITERADOR DE DICCSTRING, HAY QUE USAR VISTADICC??
-            class Lista<tupString<Dato> >::const_Iterador temp = _indicesString.vistaDicc();
-            if (!temp.HaySiguiente()) {
+            Lista<tupString<Conj<Conj<diccString<Dato> >::Iterador> > >::const_Iterador temp = _indicesString.vistaDicc();
+            if (! temp.HaySiguiente() ) {
                 _campoIndexadoString.Primero().vacio = true;
             } else {
-                if (dato = _campoIndexadoString.Primero().max) {
-                    _campoIndexadoString.Primero().max
-                            = _indicesString.max();
+                if (dato == _campoIndexadoString.Primero().max) {
+                    Dato max = Dato::datoString(_indicesString.max());
+                    _campoIndexadoString.Primero().max = max;
                 }
-                if (dato = _campoIndexadoString.Primero().min) {
-                    _campoIndexadoString.Primero().min = _indicesString.min();
+                if (dato == _campoIndexadoString.Primero().min) {
+                    Dato min = Dato::datoString(_indicesString.min());
+                    _campoIndexadoString.Primero().min = min;
                 }
 
             }
