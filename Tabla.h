@@ -18,7 +18,7 @@ public:
 
     Tabla(string nombre, Conj<string> claves, Registro columnas);
     void agregarRegistro(Registro r);
-    //void borrarRegistro(Registro cr);
+    void borrarRegistro(Registro cr);
     void indexar(string c);
     string nombre() const;
     Conj<string>::const_Iterador claves() const;
@@ -105,7 +105,7 @@ const Conj<Registro>& Tabla::registros() const {
 unsigned int Tabla::cantidadDeAccesos() const {
     return _cantAccesos;
 }
-/*
+
 void Tabla::borrarRegistro(Registro cr) {
     class Lista<struct tupString<Dato> >::const_Iterador it = cr.vistaDicc();
     string clave = it.Siguiente().clave;
@@ -195,7 +195,6 @@ void Tabla::borrarRegistro(Registro cr) {
 
     }
 }
-*/
 
 void Tabla::agregarRegistro(Registro r) {
     _cantAccesos++;
@@ -203,13 +202,13 @@ void Tabla::agregarRegistro(Registro r) {
     if (!_campoIndexadoNat.EsVacia()) {
         if (_campoIndexadoNat.Primero().vacio) {
             _campoIndexadoNat.Primero().min = r.obtener(_campoIndexadoNat.Primero().campo);
-            _campoIndexadoNat.Primero().max = r.obtener(_campoIndexadoNat.Primero().campo); 
+            _campoIndexadoNat.Primero().max = r.obtener(_campoIndexadoNat.Primero().campo);
             _campoIndexadoNat.Primero().vacio = false;
 
         } else {
             unsigned int nPaMinMax = r.obtener(_campoIndexadoNat.Primero().campo).dame_valorNat();
             if (nPaMinMax > _campoIndexadoNat.Primero().min.dame_valorNat()) {
-                _campoIndexadoNat.Primero().min =r.obtener(_campoIndexadoNat.Primero().campo); 
+                _campoIndexadoNat.Primero().min =r.obtener(_campoIndexadoNat.Primero().campo);
             }
             if (nPaMinMax > _campoIndexadoNat.Primero().max.dame_valorNat()) {
                 _campoIndexadoNat.Primero().max =r.obtener(_campoIndexadoNat.Primero().campo);
@@ -228,7 +227,7 @@ void Tabla::agregarRegistro(Registro r) {
     if (!_campoIndexadoString.EsVacia()) {
         if (_campoIndexadoString.Primero().vacio) {
             _campoIndexadoString.Primero().min = r.obtener(_campoIndexadoString.Primero().campo);
-            _campoIndexadoString.Primero().max = r.obtener(_campoIndexadoString.Primero().campo); 
+            _campoIndexadoString.Primero().max = r.obtener(_campoIndexadoString.Primero().campo);
             _campoIndexadoString.Primero().vacio = false;
 
         } else {
