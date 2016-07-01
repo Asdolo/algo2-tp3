@@ -13,9 +13,9 @@ using namespace std;
 
 template<class Significado>
 struct tupString {
-    tupString(string cla, const Significado& sign) : clave(cla), significado(sign) {};
+    tupString(string cla, Significado& sign) : clave(cla), significado(sign) {};
     string clave;
-    const Significado& significado;
+    Significado& significado;
 };
 
 template<class Significado>
@@ -25,9 +25,9 @@ public:
     diccString();
     ~diccString();
 
-    void definir(string clave, const Significado& significado);
+    void definir(string clave, Significado& significado);
     bool def(string clave) const;
-    const Significado& obtener(string clave) const;
+    Significado& obtener(string clave) const;
     const Conj<string> claves() const;
     void borrar(string clave);
     class Lista<struct tupString<Significado> >::const_Iterador vistaDicc() const;
@@ -91,7 +91,7 @@ diccString<Significado>::~diccString(){
 }
 
 template<class Significado>
-void diccString<Significado>::definir(string clave, const Significado& significado) {
+void diccString<Significado>::definir(string clave, Significado& significado) {
     assert(!def(clave) && clave.length() > 0);
 
     tupString<Significado> entrada = tupString<Significado>(clave, significado);
@@ -133,21 +133,21 @@ bool diccString<Significado>::def(string clave) const {
 }
 
 template<class Significado>
-const Significado& diccString<Significado>::obtener(string clave) const {
+Significado& diccString<Significado>::obtener(string clave) const {
     assert(def(clave) && clave.length() > 0);
 
     const Trie* actual = &(this->nodoTrie);
     for (int i = 0; i < clave.length(); i++) {
         actual = (actual->hijos)[clave[i]];
     }
-    const Significado& res = actual->valor->Siguiente().significado;
+    Significado& res = actual->valor->Siguiente().significado;
     return res;
 }
 
 template<class Significado>
 const Conj<string> diccString<Significado>::claves() const {
-    const Conj<string> res;
-    class Lista<class tupString<Significado> >::Iterador it = valores.CrearIt();
+    Conj<string> res;
+    class Lista<class tupString<Significado> >::const_Iterador it = valores.CrearIt();
     while (it.HaySiguiente()) {
         res.AgregarRapido(it.Siguiente().clave);
         it.Avanzar();

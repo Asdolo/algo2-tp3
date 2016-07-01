@@ -1,7 +1,7 @@
 /*
  * Diccionario implementado sobre dos listas enlazadas (Lista.h),
  * una de claves_ y una de significados_.
- * 
+ *
  * Created on 30 de octubre de 2010
  */
 
@@ -564,7 +564,7 @@ template<class K, class S>
 typename Dicc<K,S>::const_Iterador Dicc<K,S>::Buscar(const K& clave) const
 {
   typename Dicc<K,S>::const_Iterador it = CrearIt();
-  while(it.HaySiguiente() && it.SiguienteClave() != clave){
+  while(it.HaySiguiente() &&  !(it.SiguienteClave() == clave) ){
       it.Avanzar();
   }
   return it;

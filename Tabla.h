@@ -17,23 +17,24 @@ class Tabla {
 public:
 
     Tabla(string nombre, Conj<string> claves, Registro columnas);
-    agregarRegistro(Registro r);
-    borrarRegistro(Registro cr);
-    indexar(string c);
-    string nombre();
-    Conj<string>::Iterador claves();
-    Lista<Registro> buscar(string campo, Dato d);
-    Conj<string> indices();
-    Conj<string>::Iterador campos();
-    bool tipoCampo(string campo);
-    Conj<Registro> registros();
-    unsigned int cantidadDeAccesos();
-    Dato minimo(string campo);
-    Dato maximo(string campo);
+    //void agregarRegistro(Registro r);
+    void borrarRegistro(Registro cr);
+    void indexar(string c);
+    string nombre() const;
+    Conj<string>::const_Iterador claves() const;
+    Lista<Registro> buscar(string campo, const Dato& d) const;
+    const Conj<string> indices() const;
+    Conj<string>::const_Iterador campos() const;
+    const bool& tipoCampo(string campo) const; //const bool->no me cambien los tipos desde afuera
+    const Conj<Registro>& registros() const;
+    unsigned int cantidadDeAccesos() const;
+    const Dato& minimo(string campo) const;
+    const Dato& maximo(string campo) const;
 
 private:
 
     struct Tupla {
+        Tupla(string c, Dato mx, Dato mn, bool v) : campo(c), max(mx), min(mn), vacio(v) {};
         string campo;
         Dato max;
         Dato min;
@@ -48,7 +49,6 @@ private:
     Lista<Tupla> _campoIndexadoString;
     unsigned int _cantAccesos;
     Conj<Registro> _registros;
-
 };
 
 Tabla::Tabla(string nombre, Conj<string> claves, Registro columnas) {
@@ -57,28 +57,29 @@ Tabla::Tabla(string nombre, Conj<string> claves, Registro columnas) {
     _registros = Conj<Registro>();
     _nombre = nombre;
     _campos = diccString<bool>();
-    _claves =claves;
+    _claves = claves;
     _campoIndexadoNat = Lista<Tupla>();
     _campoIndexadoString = Lista<Tupla>();
     _cantAccesos = 0;
     class Lista<tupString<Dato> >::const_Iterador iter = columnas.vistaDicc();
     while (iter.HaySiguiente()) {
-        //REVISAR EN PDF LE FALTA A QUE DICC SE DEFINE
-        _campos.definir(iter.Siguiente().clave, iter.Siguiente().significado.esNat());
+        bool es_Nat = iter.Siguiente().significado.esNat();
+        _campos.definir(iter.Siguiente().clave, es_Nat);
         iter.Avanzar();
     }
-
 }
 
-string Tabla::nombre() {
+
+string Tabla::nombre() const {
     return _nombre;
 }
 
-Conj<string>::Iterador Tabla::claves() {
+Conj<string>::const_Iterador Tabla::claves() const {
     return _claves.CrearIt();
 }
 
-Conj<string> Tabla::indices() {
+const Conj<string> Tabla::indices() const {
+    //Quizás res debería ser una referencia, pero no es por copia devuelve basura
     Conj<string> res;
     if (_campoIndexadoNat.Longitud() > 0) {
         res.AgregarRapido(_campoIndexadoNat.Primero().campo);
@@ -89,30 +90,30 @@ Conj<string> Tabla::indices() {
     return res;
 }
 
-Conj<string>::Iterador Tabla::campos() {
-    return Conj<string>::CrearIt(campos);
+Conj<string>::const_Iterador Tabla::campos() const {
+    return _campos.claves().CrearIt();
 }
 
-bool Tabla::tipoCampo(string c) {
+const bool& Tabla::tipoCampo(string c) const {
     return _campos.obtener(c);
 }
 
-Conj<Registro> Tabla::registros() {
+const Conj<Registro>& Tabla::registros() const {
     return _registros;
 }
 
-unsigned int Tabla::cantidadDeAccesos() {
+unsigned int Tabla::cantidadDeAccesos() const {
     return _cantAccesos;
 }
 
-Tabla::borrarRegistro(Registro cr) {
+void Tabla::borrarRegistro(Registro cr) {
     class Lista<struct tupString<Dato> >::const_Iterador it = cr.vistaDicc();
     string clave = it.Siguiente().clave;
     Dato dato = it.Siguiente().significado;
 
     if (_campoIndexadoNat.Primero().campo == clave) {
         if (_indicesNat.def(dato.dame_valorNat())) {
-            Conj<Conj<Registro>::Iterador >::Iterador iterador = _indicesNat.obtener(dato.dame_valorNat()).CrearIt();
+            Conj<Conj<Registro>::Iterador >::const_Iterador iterador = _indicesNat.obtener(dato.dame_valorNat()).CrearIt();
             iterador.Siguiente().EliminarSiguiente();
             _cantAccesos++;
             _indicesNat.borrar(dato.dame_valorNat());
@@ -191,7 +192,7 @@ Tabla::borrarRegistro(Registro cr) {
     }
 }
 
-Tabla::agregarRegistro(Registro r) {
+/*void Tabla::agregarRegistro(Registro r) {
     _cantAccesos++;
     Conj<Registro>::Iterador it = _registros.AgregarRapido(r);
     if (!_campoIndexadoNat.EsVacia()) {
@@ -244,10 +245,10 @@ Tabla::agregarRegistro(Registro r) {
         }
     }
 
-}
+}*/
 
-Tabla::indexar(string c) {
-    if (this.tipoCampo(c)) {
+void Tabla::indexar(string c) {
+    if (this->tipoCampo(c)) {
         Dato dato = Dato::datoNat(0);
         _campoIndexadoNat.AgregarAdelante(Tupla(c, dato, dato, true));
         Conj<Registro>::Iterador it = _registros.CrearIt();
@@ -259,7 +260,8 @@ Tabla::indexar(string c) {
         while (it.HaySiguiente()) {
             unsigned int temp = it.Siguiente().obtener(c).dame_valorNat();
             if (!_indicesNat.def(temp)) {
-                _indicesNat.definir(temp, Conj<Conj<Registro>::Iterador>());
+                Conj<Conj<Registro>::Iterador> c_iters = Conj<Conj<Registro>::Iterador>();
+                _indicesNat.definir(temp, c_iters);
             }
             _indicesNat.obtener(temp).AgregarRapido(it);
             if (it.Siguiente().obtener(c) > _campoIndexadoNat.Primero().max) {
@@ -285,7 +287,8 @@ Tabla::indexar(string c) {
         while (it.HaySiguiente()) {
             string temp = it.Siguiente().obtener(c).dame_valorStr();
             if (!_indicesString.def(temp)) {
-                _indicesString.definir(temp, Conj<Conj<Registro>::Iterador>());
+                  Conj<Conj<Registro>::Iterador> c_iters = Conj<Conj<Registro>::Iterador>();
+                _indicesString.definir(temp, c_iters);
             }
             _indicesString.obtener(temp).AgregarRapido(it);
             if (it.Siguiente().obtener(c) > _campoIndexadoString.Primero().max) {
@@ -301,31 +304,28 @@ Tabla::indexar(string c) {
     }
 }
 
-Lista<Registro> Tabla::buscar(string c, Dato d) {
+Lista<Registro> Tabla::buscar(string c, const Dato& d) const {
     Lista<Registro> res;
     if (d.esNat()) {
-        if (_campoIndexadoNat.Primero().campo = c) {
+        if (_campoIndexadoNat.Primero().campo == c) {
             if (_indicesNat.def(d.dame_valorNat())) {
-                Conj< Conj<Registro>::Iterador >::Iterador itConjIts = _indicesNat.obtener(d.dame_valorNat()).CrearIt();
+                Conj< Conj<Registro>::Iterador >::const_Iterador itConjIts = _indicesNat.obtener(d.dame_valorNat()).CrearIt();
                 while (itConjIts.HaySiguiente()) {
                     res.AgregarAtras(itConjIts.Siguiente().Siguiente());
                     itConjIts.Avanzar();
                 }
             }
         } else {
-            if (_campoIndexadoString.Primero().campo = c) {
+            if (_campoIndexadoString.Primero().campo == c) {
                 if (_indicesString.def(d.dame_valorStr())) {
-                    Conj< Conj<Registro>::Iterador >::Iterador itConjIts2 = _indicesString.obtener(d.dame_valorNat()).CrearIt();
+                    Conj< Conj<Registro>::Iterador >::const_Iterador itConjIts2 = (_indicesString.obtener(d.dame_valorStr())).CrearIt();
                     while (itConjIts2.HaySiguiente()) {
                         res.AgregarAtras(itConjIts2.Siguiente().Siguiente());
                         itConjIts2.Avanzar();
                     }
                 }
-
-
-
             } else {
-                Conj<Registro>::Iterador it = _registros.CrearIt();
+                Conj<Registro>::const_Iterador it = _registros.CrearIt();
                 while (it.HaySiguiente()) {
                     if (it.Siguiente().obtener(c) == d) {
                         res.AgregarAtras(it.Siguiente());
@@ -337,7 +337,7 @@ Lista<Registro> Tabla::buscar(string c, Dato d) {
     }
 }
 
-Dato Tabla::minimo(string c) {
+const Dato& Tabla::minimo(string c) const {
     if (c == _campoIndexadoNat.Primero().campo) {
         return _campoIndexadoNat.Primero().min;
     } else {
@@ -346,7 +346,7 @@ Dato Tabla::minimo(string c) {
     }
 }
 
-Dato Tabla::maximo(string c) {
+const Dato& Tabla::maximo(string c) const {
 
     if (c == _campoIndexadoNat.Primero().campo) {
         return _campoIndexadoNat.Primero().max;

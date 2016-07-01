@@ -13,7 +13,7 @@ using namespace std;
 template<class Significado>
 struct tuplaDicc{
   unsigned int clave;
-  const Significado& significado;
+  Significado& significado;
 };
 
 template<class Significado>
@@ -26,9 +26,9 @@ class diccNat{
       friend ostream& operator<<(ostream& os, const diccNat<S>& d);
 
       //DEFINE CON REFERENCIA EN SIGNIFICADO, NO SE PUEDE DEFINIR USANDO CONSTANTES NI VARIABLES LOCALES (PASAN A SER BASURA CUANDO TERMINA EL SCOPE)
-      void definir(unsigned int clave, const Significado& significado);
+      void definir(unsigned int clave, Significado& significado);
       bool def(unsigned int clave) const;
-      const Significado& obtener(unsigned int clave) const;
+      Significado& obtener(unsigned int clave) const;
       void borrar(unsigned int clave);
       tuplaDicc<Significado> min() const;
       tuplaDicc<Significado> max() const;
@@ -51,11 +51,11 @@ class diccNat{
 
     private:
       struct nodoDiccNat{
-        nodoDiccNat(unsigned int k, const Significado* s)
+        nodoDiccNat(unsigned int k, Significado* s)
         : clave(k), significado(s), izq(NULL), der(NULL) {};
 
         unsigned int clave;
-        const Significado* significado;
+        Significado* significado;
         nodoDiccNat* izq;
         nodoDiccNat* der;
       };
@@ -73,16 +73,15 @@ diccNat<Significado>::diccNat()
 
 template<class Significado>
 diccNat<Significado>::~diccNat(){
-  int maximo = max().clave;
   int minimo;
-  while (def(maximo)){
+  while ( estr != NULL ){
     minimo = min().clave;
     borrar(minimo);
   }
 }
 
 template<class Significado>
-void diccNat<Significado>::definir(unsigned int clave, const Significado& significado){
+void diccNat<Significado>::definir(unsigned int clave, Significado& significado){
   assert(!def(clave));
 	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
@@ -136,7 +135,7 @@ bool diccNat<Significado>::def(unsigned int clave) const{
 }
 
 template<class Significado>
-const Significado& diccNat<Significado>::obtener(unsigned int clave) const{
+Significado& diccNat<Significado>::obtener(unsigned int clave) const{
   assert(def(clave));
 	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
@@ -151,7 +150,7 @@ const Significado& diccNat<Significado>::obtener(unsigned int clave) const{
 			}
 		}
 	}
-  const Significado& res = *(diccAux->significado);
+  Significado& res = *(diccAux->significado);
 	return res;
 }
 
