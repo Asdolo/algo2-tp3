@@ -41,6 +41,7 @@ public:
     diccString(const diccString<Significado>& other);
     diccString<Significado>& operator=(const diccString<Significado>& other);
     bool operator==(const diccString<Significado>& other) const;
+    bool operator!=(const diccString<Significado>& other) const;
 
 private:
 
@@ -265,6 +266,11 @@ diccString<Significado>& diccString<Significado>::operator=(const diccString<Sig
 template<class Significado>
 bool diccString<Significado>::operator==(const diccString<Significado>& other) const {
     return (valores == other.valores);
+}
+
+template<class Significado>
+bool diccString<Significado>::operator!=(const diccString<Significado>& other) const {
+    return !(valores == other.valores);
 }
 
 template<class Significado>
