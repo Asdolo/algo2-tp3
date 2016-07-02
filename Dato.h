@@ -139,8 +139,8 @@ using namespace std;
     }
 
     ostream& operator<<(ostream& os, const Dato& d){
-      d.esNat()?  os << d.valorNat << endl:
-                  os << d.valorStr << endl;
+      d.esNat()?  os << d.valorNat:
+                  os << d.valorStr;
       return os;
     }
 

@@ -93,7 +93,9 @@ diccString<Significado>::~diccString(){
   string minimo;
   int i = 0;
   while ( nodoTrie.cantHijos > 0 ){
+    //std::cout << "Hijos: " << nodoTrie.cantHijos << std::endl;
     minimo = min();
+    //std::cout << "Mínimo: " << minimo << std::endl;
     borrar(minimo);
   }
 }
@@ -266,20 +268,22 @@ bool diccString<Significado>::operator==(const diccString<Significado>& other) c
       string k = it.Siguiente().clave;
       Significado s = it.Siguiente().significado;
       if ( def(k) ) {
-        res = ( other.obtener(k) == s);
+        res = ( obtener(k) == s);
       } else {
         res = false;
       }
+      it.Avanzar();
     }
     it = valores.CrearIt();
     while ( it.HaySiguiente() && res ) {
       string k = it.Siguiente().clave;
       Significado s = it.Siguiente().significado;
       if ( other.def(k) ) {
-        res = ( obtener(k) == s );
+        res = ( other.obtener(k) == s );
       } else {
         res = false;
       }
+      it.Avanzar();
     }
     return res;
 }
