@@ -13,7 +13,7 @@ using namespace std;
 template<class Significado>
 struct tuplaDicc{
   unsigned int clave;
-  Significado& significado;
+  Significado significado;
 };
 
 template<class Significado>
@@ -26,10 +26,10 @@ class diccNat{
       friend ostream& operator<<(ostream& os, const diccNat<S>& d);
 
       //DEFINE CON REFERENCIA EN SIGNIFICADO, NO SE PUEDE DEFINIR USANDO CONSTANTES NI VARIABLES LOCALES (PASAN A SER BASURA CUANDO TERMINA EL SCOPE)
-      void definir(unsigned int clave, Significado& significado);
-      bool def(unsigned int clave) const;
-      Significado& obtener(unsigned int clave) const;
-      void borrar(unsigned int clave);
+      void definir(const unsigned int clave, const Significado& significado);
+      bool def(const unsigned int clave) const;
+      Significado& obtener(const unsigned int clave) const;
+      void borrar(const unsigned int clave);
       tuplaDicc<Significado> min() const;
       tuplaDicc<Significado> max() const;
       Iterador crearIt() const;
@@ -76,32 +76,35 @@ diccNat<Significado>::~diccNat(){
   int minimo;
   while ( estr != NULL ){
     minimo = min().clave;
+    std::cout << "min: " << minimo << std::endl;
     borrar(minimo);
   }
 }
 
 template<class Significado>
-void diccNat<Significado>::definir(unsigned int clave, Significado& significado){
+void diccNat<Significado>::definir(const unsigned int clave, const Significado& significado){
   assert(!def(clave));
 	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
+  Significado* signi = new Significado(significado);
+  std::cout << "PUNTERO DE MIERDA: " << signi << std::endl;
 	while (!termine) {
 		if (this->estr == NULL) {
-			this->estr = new nodoDiccNat(clave, &significado);
+			this->estr = new nodoDiccNat(clave, signi);
       termine = true;
 		} else {
 			if (diccAux->clave >clave) {
 				if (diccAux->izq != NULL) {
 					diccAux = (diccAux->izq);
 				} else {
-					(diccAux->izq) = new nodoDiccNat(clave, &significado);
+					(diccAux->izq) = new nodoDiccNat(clave, signi);
 					termine = true;
 				}
 			} else {
 				if (diccAux->der != NULL) {
 					diccAux = (diccAux->der);
 				} else {
-					(diccAux->der) = new nodoDiccNat(clave, &significado);
+					(diccAux->der) = new nodoDiccNat(clave, signi);
 					termine = true;
 				}
 			}
@@ -110,7 +113,7 @@ void diccNat<Significado>::definir(unsigned int clave, Significado& significado)
 }
 
 template<class Significado>
-bool diccNat<Significado>::def(unsigned int clave) const{
+bool diccNat<Significado>::def(const unsigned int clave) const{
 	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
   bool res;
@@ -135,7 +138,7 @@ bool diccNat<Significado>::def(unsigned int clave) const{
 }
 
 template<class Significado>
-Significado& diccNat<Significado>::obtener(unsigned int clave) const{
+Significado& diccNat<Significado>::obtener(const unsigned int clave) const{
   assert(def(clave));
 	nodoDiccNat* diccAux = this->estr;
 	bool termine = false;
@@ -155,9 +158,10 @@ Significado& diccNat<Significado>::obtener(unsigned int clave) const{
 }
 
 template<class Significado>
-void diccNat<Significado>::borrar(unsigned int clave){
+void diccNat<Significado>::borrar(const unsigned int clave){
   assert(def(clave));
-	nodoDiccNat* diccAux = this->estr;
+
+	nodoDiccNat* diccAux = estr;
 	bool termine = false;
 	nodoDiccNat* padre = NULL;
 	while (!termine) {
@@ -173,9 +177,10 @@ void diccNat<Significado>::borrar(unsigned int clave){
 			}
 		}
 	}
-
+  std::cout << "Clave: " << clave << std::endl;
   //SE AGREGARON LOS CASOS HEAD
 	if (diccAux->izq == NULL && diccAux->der == NULL) {
+    std::cout << "Hoja" << std::endl;
     if (estr == diccAux){
       estr = NULL;
     } else if (padre->izq == diccAux) {
@@ -183,8 +188,12 @@ void diccNat<Significado>::borrar(unsigned int clave){
 		} else {
 			padre->der = NULL;
 		}
+    std::cout << "DELETE SIGNI: " << diccAux->significado << std::endl;
+    std::cout << "Valor posta:" << diccAux->clave << std::endl;
+    delete diccAux->significado;
     delete diccAux;
 	} else if (diccAux->izq == NULL && diccAux->der != NULL) {
+    std::cout << "Caso hijo der" << std::endl;
     if (estr == diccAux){
       estr = diccAux->der;
     } else if (padre->izq == diccAux) {
@@ -192,8 +201,12 @@ void diccNat<Significado>::borrar(unsigned int clave){
 		} else {
 			padre->der = diccAux->der;
 		}
+    std::cout << "DELETE SIGNI: " << diccAux->significado << std::endl;
+    std::cout << "Valor posta:" << diccAux->clave << std::endl;
+    delete diccAux->significado;
     delete diccAux;
 	} else if (diccAux->izq != NULL && diccAux->der == NULL) {
+    std::cout << "Caso hijo izq" << std::endl;
     if (estr == diccAux){
       estr = diccAux->izq;
     } else if (padre->izq == diccAux) {
@@ -201,16 +214,19 @@ void diccNat<Significado>::borrar(unsigned int clave){
 		} else {
 			padre->der = diccAux->izq;
 		}
+    std::cout << "DELETE SIGNI: " << diccAux->significado << std::endl;
+    std::cout << "Valor posta:" << diccAux->clave << std::endl;
+    delete diccAux->significado;
     delete diccAux;
 	} else if (diccAux->izq != NULL && diccAux->der != NULL) {
-    diccNat<Significado> droga;
-    droga.estr = diccAux->der;
-		tuplaDicc<Significado> temp = droga.min();
-		this->borrar(temp.clave);
+    std::cout << "Caso dos hijos" << std::endl;
+    diccNat<Significado> dicc;         // Por discrepancias diseño/c++...
+    dicc.estr = diccAux->der;
+		tuplaDicc<Significado> temp = dicc.min();
+		borrar(temp.clave);
 		diccAux->clave = temp.clave;
 		diccAux->significado = &(temp.significado);
 	}
-  std::cout << "" << std::endl;
 }
 
 template<class Significado>

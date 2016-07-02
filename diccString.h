@@ -13,13 +13,13 @@ using namespace std;
 
 template<class Significado>
 struct tupString {
-    tupString(string cla, Significado& sign) : clave(cla), significado(sign) {};
+    tupString(string cla, const Significado& sign) : clave(cla), significado(sign) {};
     bool operator==(const tupString& other) const {                             //No sé por qué presiento que esto no debería ser necesario, pero me lo pide en tabla...
       return (clave == other.clave && significado == other.significado);
     }
 
     string clave;
-    Significado& significado;
+    Significado significado;
 };
 
 template<class Significado>
@@ -29,9 +29,9 @@ public:
     diccString();
     ~diccString();
 
-    void definir(string clave, Significado& significado);
-    bool def(string clave) const;
-    Significado& obtener(string clave) const;
+    void definir(const string& clave, const Significado& significado);
+    bool def(const string& clave) const;
+    Significado& obtener(const string& clave) const;
     const Conj<string> claves() const;
     void borrar(string clave);
     class Lista<struct tupString<Significado> >::const_Iterador vistaDicc() const;
@@ -42,6 +42,7 @@ public:
     diccString<Significado>& operator=(const diccString<Significado>& other);
     bool operator==(const diccString<Significado>& other) const;
     bool operator!=(const diccString<Significado>& other) const;
+
 
 private:
 
@@ -58,6 +59,7 @@ private:
     };
     Trie nodoTrie;
     Lista<class tupString<Significado> > valores;
+
 
 };
 
@@ -80,9 +82,6 @@ ostream& operator<<(ostream& os, const tupString<Significado>& t){
   return os;
 }
 
-
-
-
 template<class Significado>
 diccString<Significado>::diccString(){
     nodoTrie =  Trie();
@@ -100,7 +99,7 @@ diccString<Significado>::~diccString(){
 }
 
 template<class Significado>
-void diccString<Significado>::definir(string clave, Significado& significado) {
+void diccString<Significado>::definir(const string& clave, const Significado& significado) {
     assert(!def(clave) && clave.length() > 0);
 
     tupString<Significado> entrada = tupString<Significado>(clave, significado);
@@ -119,7 +118,7 @@ void diccString<Significado>::definir(string clave, Significado& significado) {
 }
 
 template<class Significado>
-bool diccString<Significado>::def(string clave) const {
+bool diccString<Significado>::def(const string& clave) const {
     const Trie* actual = &(this->nodoTrie);
     bool res = true;
     int i = 0;
@@ -142,7 +141,7 @@ bool diccString<Significado>::def(string clave) const {
 }
 
 template<class Significado>
-Significado& diccString<Significado>::obtener(string clave) const {
+Significado& diccString<Significado>::obtener(const string& clave) const {
     assert(def(clave) && clave.length() > 0);
 
     const Trie* actual = &(this->nodoTrie);
@@ -193,8 +192,6 @@ void diccString<Significado>::borrar(string clave) {
         }
     }
 }
-
-
 
 template<class Significado>
 class Lista<tupString<Significado> >::const_Iterador diccString<Significado>::vistaDicc() const {
@@ -252,25 +249,44 @@ string diccString<Significado>::max() const {
     return res;
 }
 
-/* vale para constructor por copia tambien*/
 template<class Significado>
 diccString<Significado>& diccString<Significado>::operator=(const diccString<Significado>& other) {
     class Lista< tupString<Significado> >::const_Iterador it = other.valores.CrearIt();
     while (it.HaySiguiente()) {
-        Significado copia = Significado(it.Siguiente().significado);
-        this->definir(it.Siguiente().clave, copia);
+        definir(it.Siguiente().clave, it.Siguiente().significado);
         it.Avanzar();
     }
 }
 
 template<class Significado>
 bool diccString<Significado>::operator==(const diccString<Significado>& other) const {
-    return (valores == other.valores);
+    bool res = true;
+    class Lista< tupString<Significado> >::const_Iterador it = other.valores.CrearIt();
+    while ( it.HaySiguiente() && res ) {
+      string k = it.Siguiente().clave;
+      Significado s = it.Siguiente().significado;
+      if ( def(k) ) {
+        res = ( other.obtener(k) == s);
+      } else {
+        res = false;
+      }
+    }
+    it = valores.CrearIt();
+    while ( it.HaySiguiente() && res ) {
+      string k = it.Siguiente().clave;
+      Significado s = it.Siguiente().significado;
+      if ( other.def(k) ) {
+        res = ( obtener(k) == s );
+      } else {
+        res = false;
+      }
+    }
+    return res;
 }
 
 template<class Significado>
 bool diccString<Significado>::operator!=(const diccString<Significado>& other) const {
-    return !(valores == other.valores);
+    return !(*this == other);
 }
 
 template<class Significado>

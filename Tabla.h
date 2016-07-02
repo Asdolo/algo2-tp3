@@ -16,16 +16,16 @@ using namespace std;
 class Tabla {
 public:
 
-    Tabla(string nombre, Conj<string> claves, Registro columnas);
+    Tabla(const string& nombre, Conj<string> claves, Registro columnas);
     void agregarRegistro(Registro r);
     void borrarRegistro(Registro cr);
-    void indexar(string c);
+    void indexar(const string& c);
     string nombre() const;
     Conj<string>::const_Iterador claves() const;
-    Lista<Registro> buscar(string campo, const Dato& d) const;
+    Lista<Registro> buscar(const string& campo, const Dato& d) const;
     const Conj<string> indices() const;
     Conj<string>::const_Iterador campos() const;
-    const bool& tipoCampo(string campo) const; //const bool->no me cambien los tipos desde afuera
+    bool tipoCampo(const string& campo) const; //const bool->no me cambien los tipos desde afuera
     const Conj<Registro>& registros() const;
     unsigned int cantidadDeAccesos() const;
     const Dato& minimo(string campo) const;
@@ -51,7 +51,7 @@ private:
     Conj<Registro> _registros;
 };
 
-Tabla::Tabla(string nombre, Conj<string> claves, Registro columnas) {
+Tabla::Tabla(const string& nombre, Conj<string> claves, Registro columnas) {
     _indicesString = diccString<Lista<Conj<Registro>::Iterador> >();
     _indicesNat = diccNat<Lista<Conj<Registro>::Iterador> >();
     _registros = Conj<Registro>();
@@ -93,7 +93,7 @@ Conj<string>::const_Iterador Tabla::campos() const {
     return _campos.claves().CrearIt();
 }
 
-const bool& Tabla::tipoCampo(string c) const {
+bool Tabla::tipoCampo(const string& c) const {
     return _campos.obtener(c);
 }
 
@@ -250,7 +250,7 @@ void Tabla::agregarRegistro(Registro r) {
 
 }
 
-void Tabla::indexar(string c) {
+void Tabla::indexar(const string& c) {
     if (this->tipoCampo(c)) {
         Dato dato = Dato::datoNat(0);
         _campoIndexadoNat.AgregarAdelante(Tupla(c, dato, dato, true));
@@ -307,7 +307,7 @@ void Tabla::indexar(string c) {
     }
 }
 
-Lista<Registro> Tabla::buscar(string c, const Dato& d) const {
+Lista<Registro> Tabla::buscar(const string& c, const Dato& d) const {
     Lista<Registro> res;
     if (d.esNat()) {
         if (_campoIndexadoNat.Primero().campo == c) {
