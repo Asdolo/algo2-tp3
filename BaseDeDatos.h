@@ -97,16 +97,17 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
         Conj<string>::const_Iterador itTabSecund = b.Tablas();
 
         while (itTabSecund.HaySiguiente()) {
-             if (b.hayJoin(itTab.Siguiente(), itTabSecund.Siguiente())) {
-                 os << "Join " << itTab.Siguiente() << " --> " << itTabSecund.Siguiente() << endl;
+            if (b.hayJoin(itTab.Siguiente(), itTabSecund.Siguiente())) {
+                os << "Join " << itTab.Siguiente() << " --> " << itTabSecund.Siguiente() << endl;
               Conj<Registro> registrosDelJoin = b._registrosDelJoin.obtener(itTab.Siguiente()).obtener(itTabSecund.Siguiente());
               Conj<Registro>::Iterador itReg= registrosDelJoin.CrearIt();
               while(itReg.HaySiguiente()){
                   os << itReg.Siguiente() << endl;
                   itReg.Avanzar();
               }
-             }
-             itTabSecund.Avanzar();
+
+            }
+            itTabSecund.Avanzar();
         }
     }
     os << "----------------------------" << endl;
