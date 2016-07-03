@@ -18,152 +18,150 @@ using namespace std;
 class BaseDeDatos {
 public:
 
-    /**
-     * Crea una Base de datos.
-     */
     BaseDeDatos();
 
-    /**
-     * Agrega una tabla a la base de datos.
-     */
-    agregarTabla(Tabla t);
+    void agregarTabla(Tabla t);
 
-    /**
-     * Inserta un registro en una tabla
-     */
-    insertarEntrada(Registro r, string s);
+    void insertarEntrada(Registro r, string s);
 
-    Borrar(Registro cr, string t);
+    void Borrar(Registro cr, string t);
 
-    Conj<Registro> combinarRegistros(string t1, string t2, string campo);
+    Conj<Registro> combinarRegistros(string t1, string t2, string campo) const;
 
-    Conj<Registro>::Iterador generarVistaJoin(string t1, string t2, string campo);
+    Conj<Registro>::const_Iterador generarVistaJoin(string t1, string t2, string campo);
 
-    BorrarJoin(string t1, string t2);
+    void BorrarJoin(string t1, string t2);
 
-    Conj<string>::Iterador Tablas();
+    Conj<string>::const_Iterador Tablas() const;
 
-    Tabla dameTabla(string t);
+    Tabla dameTabla(string t) const;
 
-    bool hayJoin(string t1, string t2);
+    bool hayJoin(string t1, string t2) const;
 
-    string campoJoin(string t1, string t2);
+    string campoJoin(string t1, string t2) const;
 
-    static Registro Merge(Registro r1, Registro r2);
+    Conj<Registro>::const_Iterador vistaJoin(string t1, string t2);
 
-    Conj<Registro>::Iterador vistaJoin(string t1, string t2);
-
-    Conj<Registro> busquedaCriterio(Registro cr, string t);
-
-    static bool coincidenTodosCrit(Registro crit, Registro r);
-
-    string tablaMaxima();
-
+    string tablaMaxima() const;
 
 private:
 
-    struct tupBdd {
-        string campoJoin;
-        Lista<tupInterna> cambiosT1;
-        Lista<tupInterna> cambiosT2;
+    static Registro Merge(Registro r1, Registro r2);
 
-    };
+    static bool coincidenTodosCrit(Registro crit, Registro r);
+
+    Conj<Registro> busquedaCriterio(Registro cr, string t) const;
 
     struct tupInterna {
-        Registro reg;
-        bool agregar;
+      Registro reg;
+      bool agregar;
     };
-    string* tablaMasAccedida;
-    diccString<Tabla> nombreATabla;
-    Conj<string> tablas;
-    diccString<diccString<diccNat<Conj<Registro>::Iterador > > > joinPorCampoNat;
-    diccString<diccString<diccString<Conj<Registro>::Iterador > > > joinPorCampoString;
-    diccString<diccString<Conj<Registro > > > registrosDelJoin;
-    diccString<diccString<tupBdd > > hayJoin;
+
+    struct tupBdd {
+      string campoJoin;
+      Lista<tupInterna> cambiosT1;
+      Lista<tupInterna> cambiosT2;
+    };
+
+    string* _tablaMasAccedida;
+    diccString<Tabla> _nombreATabla;
+    Conj<string> _tablas;
+    diccString<diccString<diccNat<Conj<Registro>::Iterador > > > _joinPorCampoNat;
+    diccString<diccString<diccString<Conj<Registro>::Iterador > > > _joinPorCampoString;
+    diccString<diccString<Conj<Registro > > > _registrosDelJoin;
+    diccString<diccString<tupBdd > > _hayJoin;
 };
 
 
-bool operator==(const BaseDeDatos& b1, const BaseDeDatos& b2);
+bool operator==(const BaseDeDatos& b1, const BaseDeDatos& b2); //Se usa?
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, const BaseDeDatos&);
+std::ostream& operator<<(std::ostream& os, const BaseDeDatos&); //Por qué el template?
 
-BaseDeDatos::BaseDeDatos() : tablaMasAccedida(NULL), nombreATabla(diccString<Tabla>()), tablas(Conj<string>()), hayJoin(diccString<diccString<tupBdd > >()), joinPorCampoString(diccString<diccString<diccString<Conj<Registro>::Iterador > > >()), joinPorCampoNat(diccString<diccString<diccNat<Conj<Registro>::Iterador > > >()), registrosDelJoin(diccString<diccString<Conj<Registro > > >()) {
-}
+BaseDeDatos::BaseDeDatos() :
+  _tablaMasAccedida(NULL),
+  _nombreATabla(diccString<Tabla>()),
+  _tablas(Conj<string>()),
+  _hayJoin(diccString<diccString<tupBdd > >()),
+  _joinPorCampoString(diccString<diccString<diccString<Conj<Registro>::Iterador > > >()),
+  _joinPorCampoNat(diccString<diccString<diccNat<Conj<Registro>::Iterador > > >()),
+  _registrosDelJoin(diccString<diccString<Conj<Registro > > >())
+{}
 
-BaseDeDatos::agregarTabla(Tabla t) {
-    if (tablaMasAccedida == NULL || nombreATabla.obtener(*tablaMasAccedida).cantidadDeAccesos() < t.cantidadDeAccesos()) {
-        tablaMasAccedida = &(t.nombre);
+void BaseDeDatos::agregarTabla(Tabla t) {
+    if (_tablaMasAccedida == NULL || _nombreATabla.obtener(*_tablaMasAccedida).cantidadDeAccesos() < t.cantidadDeAccesos()) {
+        _tablaMasAccedida = new string(t.nombre());
     }
-    nombreATabla.definir(t.nombre, t);
-    tablas.AgregarRapido(t.nombre);
-    hayJoin.definir(t.nombre(), diccString<tupBdd >());
-    joinPorCampoNat.definir(t.nombre(), diccString<diccNat<Conj<Registro>::Iterador > >());
-    joinPorCampoString.definir(t.nombre(), diccString<diccString<Conj<Registro>::Iterador > >());
-    registrosDelJoin.definir(t.nombre(), diccString<Conj<Registro > >());
+    _nombreATabla.definir(t.nombre(), t);
+    _tablas.AgregarRapido(t.nombre());
+    _hayJoin.definir(t.nombre(), diccString<tupBdd >());
+    _joinPorCampoNat.definir(t.nombre(), diccString<diccNat<Conj<Registro>::Iterador > >());
+    _joinPorCampoString.definir(t.nombre(), diccString<diccString<Conj<Registro>::Iterador > >());
+    _registrosDelJoin.definir(t.nombre(), diccString<Conj<Registro > >());
 }
 
-BaseDeDatos::insertarEntrada(Registro r, string s) {
-    Tabla tabla = nombreATabla.obtener(s);
+void BaseDeDatos::insertarEntrada(Registro r, string s) {
+    Tabla tabla = _nombreATabla.obtener(s);
     tabla.agregarRegistro(r);
-    Tabla tabMax = nombreATabla.obtener(*tablaMasAccedida);
-    if (tabla.cantidadDeAccesos > tabMax.cantidadDeAccesos) {
-        tablaMasAccedida = &s;
+    Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
+    if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
+        _tablaMasAccedida = &s;
     }
-    class Lista<struct tupString<tupBdd > >::const_Iterador iter = hayJoin.obtener(s).vistaDicc();
+    class Lista<struct tupString<tupBdd > >::const_Iterador iter = _hayJoin.obtener(s).vistaDicc(); //PROBLEMAAAAAAAAAAAA
 
     while (iter.HaySiguiente()) {
         tupInterna tup;
         tup.reg = r;
         tup.agregar = true;
-        iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
+        //iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
         iter.Avanzar();
     }
-    iter = tablas.CrearIt();
-    while (iter.HaySiguiente()) {
-        if (hayJoin.obtener(iter.Siguiente()).def(s)) {
-            tupBdd cambios = hayJoin.obtener(iter.Siguiente()).obtener(s);
+    Conj<string>::Iterador iterTablas =_tablas.CrearIt();
+    while (iterTablas.HaySiguiente()) {
+        if (_hayJoin.obtener(iterTablas.Siguiente()).def(s)) {
+            tupBdd cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(s);
             tupInterna tup;
             tup.reg = r;
             tup.agregar = true;
             cambios.cambiosT2.AgregarAtras(tup);
         }
-        iter.Avanzar();
+        iterTablas.Avanzar();
     }
 }
 
-BaseDeDatos::Borrar(Registro cr, string t) {
-    Tabla tabla = nombreATabla.obtener(t);
+void BaseDeDatos::Borrar(Registro cr, string t) {
+    Tabla tabla = _nombreATabla.obtener(t);
     tabla.borrarRegistro(cr);
-    Tabla tabMax = nombreATabla.obtener(*tablaMasAccedida);
-    if (tabla.cantidadDeAccesos > tabMax.cantidadDeAccesos) {
-        tablaMasAccedida = &t;
+    Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
+    if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
+        _tablaMasAccedida = &t;
     }
-    class Lista<struct tupString<tupBdd > >::const_Iterador iter = hayJoin.obtener(t).vistaDicc();
+    class Lista<struct tupString<tupBdd > >::const_Iterador iter = _hayJoin.obtener(t).vistaDicc();
     while (iter.HaySiguiente()) {
         tupInterna tup;
         tup.reg = cr;
         tup.agregar = false;
-        iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
+        //iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
         iter.Avanzar();
     }
-    while (iter.HaySiguiente()) {
-        if (hayJoin.obtener(iter.Siguiente()).def(t)) {
-            tupBdd cambios = hayJoin.obtener(iter.Siguiente()).obtener(t);
+    Conj<string>::Iterador iterTablas =_tablas.CrearIt();
+    while (iterTablas.HaySiguiente()) {
+        if (_hayJoin.obtener(iterTablas.Siguiente()).def(t)) {
+            tupBdd cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(t);
             tupInterna tup;
             tup.reg = cr;
             tup.agregar = false;
             cambios.cambiosT2.AgregarAtras(tup);
         }
-        iter.Avanzar();
+        iterTablas.Avanzar();
     }
 
 }
 
-Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo) {
-    Tabla tabla1 = nombreATabla.obtener(t1);
-    Tabla tabla2 = nombreATabla.obtener(t2);
-    Conj<Registro>::Iterador it;
+Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo) const {
+    Tabla tabla1 = _nombreATabla.obtener(t1);
+    Tabla tabla2 = _nombreATabla.obtener(t2);
+    Conj<Registro>::const_Iterador it;
     Tabla tablaBusq = tabla1;
     if (tabla1.indices().Pertenece(campo)) {
         Tabla tablaIt = tabla2;
@@ -189,76 +187,75 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
         res.AgregarRapido(regMergeado);
         it.Avanzar();
     }
-
     return res;
 }
 
-Conj<Registro>::Iterador BaseDeDatos::generarVistaJoin(string t1, string t2, string campo) {
+Conj<Registro>::const_Iterador BaseDeDatos::generarVistaJoin(string t1, string t2, string campo) {
     tupBdd aux;
     aux.campoJoin = campo;
     aux.cambiosT1 = Lista<tupInterna>();
     aux.cambiosT2 = Lista<tupInterna>();
-    hayJoin.obtener(t1).definir(t2, aux);
-    registrosDelJoin.obtener(t1).definir(t2, Conj<Registro>());
-    Tabla tabla1 = nombreATabla.obtener(t1);
-    Tabla tabla2 = nombreATabla.obtener(t2);
+    _hayJoin.obtener(t1).definir(t2, aux);
+    _registrosDelJoin.obtener(t1).definir(t2, Conj<Registro>());
+    Tabla tabla1 = _nombreATabla.obtener(t1);
+    Tabla tabla2 = _nombreATabla.obtener(t2);
     if (tabla1.tipoCampo(campo)) {
-        joinPorCampoNat.obtener(t1).definir(t2, diccNat < Conj<Registro>::Iterador);
+        _joinPorCampoNat.obtener(t1).definir(t2, diccNat < Conj<Registro>::Iterador>());
 
         Conj<Registro> regsMergeados = combinarRegistros(t1, t2, campo);
         Conj<Registro>::Iterador it = regsMergeados.CrearIt();
         while (it.HaySiguiente()) {
             Dato d = it.Siguiente().obtener(campo);
-            Conj<Registro>::Iterador iter = registrosDelJoin.obtener(t1).obtener(t2).AgregarRapido(it.Siguiente());
+            Conj<Registro>::Iterador iter = _registrosDelJoin.obtener(t1).obtener(t2).AgregarRapido(it.Siguiente());
             unsigned int n = d.dame_valorNat();
-            joinPorCampoNat.obtener(t1).obtener(t2).definir(n, iter);
+            _joinPorCampoNat.obtener(t1).obtener(t2).definir(n, iter);
             it.Avanzar();
         }
     } else {
-        joinPorCampoString.obtener(t1).definir(t2, diccString < Conj<Registro>::Iterador);
+        _joinPorCampoString.obtener(t1).definir(t2, diccString < Conj<Registro>::Iterador>());
         Conj<Registro> regsMergeados = combinarRegistros(t1, t2, campo);
         Conj<Registro>::Iterador it = regsMergeados.CrearIt();
         while (it.HaySiguiente()) {
             Dato d = it.Siguiente().obtener(campo);
-            Conj<Registro>::Iterador iter = registrosDelJoin.obtener(t1).obtener(t2).AgregarRapido(it.Siguiente());
+            Conj<Registro>::Iterador iter = _registrosDelJoin.obtener(t1).obtener(t2).AgregarRapido(it.Siguiente());
             string s = d.dame_valorStr();
-            joinPorCampoNat.obtener(t1).obtener(t2).definir(s, iter);
+            _joinPorCampoString.obtener(t1).obtener(t2).definir(s, iter);
             it.Avanzar();
         }
     }
 
-    Conj<Registro>::Iterador res = registrosDelJoin.obtener(t1).obtener(t2).CrearIt();
+    Conj<Registro>::const_Iterador res = _registrosDelJoin.obtener(t1).obtener(t2).CrearIt();
     return res;
 }
 
 void BaseDeDatos::BorrarJoin(string t1, string t2) {
-    hayJoin.obtener(t1).borrar(t2);
-    registrosDelJoin.obtener(t1).borrar(t2);
-    if (joinPorCampoNat.obtener(t1).def(t2)) {
-        joinPorCampoNat.obtener(t1).borrar(t2);
+    _hayJoin.obtener(t1).borrar(t2);
+    _registrosDelJoin.obtener(t1).borrar(t2);
+    if (_joinPorCampoNat.obtener(t1).def(t2)) {
+        _joinPorCampoNat.obtener(t1).borrar(t2);
     } else {
-        joinPorCampoString.obtener(t1).borrar(t2);
+        _joinPorCampoString.obtener(t1).borrar(t2);
     }
 
 }
 
-Conj<string>::Iterador BaseDeDatos::Tablas() {
-    return tablas.CrearIt();
+Conj<string>::const_Iterador BaseDeDatos::Tablas() const {
+    return _tablas.CrearIt();
 }
 
-Tabla BaseDeDatos::dameTabla(string s) {
-    return nombreATabla.obtener(s);
+Tabla BaseDeDatos::dameTabla(string s) const {
+    return _nombreATabla.obtener(s);
 }
 
-bool BaseDeDatos::hayJoin(string s1, string s2) {
-    return hayJoin.obtener(s1).def(s2);
+bool BaseDeDatos::hayJoin(string s1, string s2) const {
+    return _hayJoin.obtener(s1).def(s2);
 }
 
-string BaseDeDatos::campoJoin(string s1, string s2) {
-    return hayJoin.obtener(s1).obtener(s2).campoJoin;
+string BaseDeDatos::campoJoin(string s1, string s2) const {
+    return _hayJoin.obtener(s1).obtener(s2).campoJoin;
 }
 
-Registro Merge(Registro r1, Registro r2) {
+Registro BaseDeDatos::Merge(Registro r1, Registro r2) {
     Registro res = r1;
     class Lista<struct tupString<Dato> >::const_Iterador ite = r2.vistaDicc();
     while (ite.HaySiguiente()) {
@@ -267,25 +264,23 @@ Registro Merge(Registro r1, Registro r2) {
         }
         ite.Avanzar();
     }
+    return res;
 }
 
-Conj<Registro>::Iterador BaseDeDatos::vistaJoin(string s1, string s2) {
+Conj<Registro>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) {
     //COMPLETAR!!
 }
 
-Conj<Registro> BaseDeDatos::busquedaCriterio(Registro crit, string t) {
+Conj<Registro> BaseDeDatos::busquedaCriterio(Registro crit, string t) const {
     //COMPLETAR!!
 }
 
-bool coincidenTodosCrit(Registro crit, Registro r) {
+bool BaseDeDatos::coincidenTodosCrit(Registro crit, Registro r) {
     //COMPLETAR!!
 }
 
-string BaseDeDatos::tablaMaxima() {
-    return (*tablaMasAccedida);
+string BaseDeDatos::tablaMaxima() const {
+    return (*_tablaMasAccedida);
 }
-
-
-
 
 #endif
