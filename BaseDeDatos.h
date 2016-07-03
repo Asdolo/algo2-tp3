@@ -173,7 +173,7 @@ void BaseDeDatos::insertarEntrada(Registro r, string s) {
 void BaseDeDatos::Borrar(Registro cr, string t) {
     assert(_nombreATabla.def(t));
 
-    Tabla tabla = _nombreATabla.obtener(t);
+    Tabla& tabla = _nombreATabla.obtener(t);
     tabla.borrarRegistro(cr);
     Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
     if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
@@ -216,7 +216,7 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
     it = tablaIt.registros().CrearIt();
 
     Conj<Registro> res;
-   
+
     while (it.HaySiguiente()) {
          Registro regMergeado;
         Dato d = it.Siguiente().obtener(campo);
@@ -313,7 +313,7 @@ string BaseDeDatos::campoJoin(string s1, string s2) const {
 
 Registro BaseDeDatos::Merge(Registro r1, Registro r2) {
     Registro res = r1;
- class Lista<struct tupString<Dato> >::const_Iterador ite = r2.vistaDicc();  
+ class Lista<struct tupString<Dato> >::const_Iterador ite = r2.vistaDicc();
  while (ite.HaySiguiente()) {
         if (!(r1.def(ite.Siguiente().clave))) {
             res.definir(ite.Siguiente().clave, ite.Siguiente().significado);
