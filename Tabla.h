@@ -138,6 +138,7 @@ unsigned int Tabla::cantidadDeAccesos() const {
 }
 
 void Tabla::borrarRegistro(Registro cr) {
+
     class Lista<struct tupString<Dato> >::const_Iterador it = cr.vistaDicc();
     string clave = it.Siguiente().clave;
     Dato dato = it.Siguiente().significado;
@@ -296,12 +297,15 @@ void Tabla::agregarRegistro(Registro r) {
         } else {
             Lista<Lista<IteradoresIndices>::Iterador> nuevaLista;
             Lista<Lista<IteradoresIndices>::Iterador>::Iterador iter_str = nuevaLista.AgregarAtras(it);
+            it.Siguiente().itString = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_str);
             _indicesString.definir(aux.dame_valorStr(), nuevaLista);
         }
     }
 }
 
 void Tabla::indexar(const string& c) {
+    assert( tipoCampo(c)? _campoIndexadoNat.EsVacia() : _campoIndexadoString.EsVacia() );
+
     if ( tipoCampo(c) ) {
         Dato dato = Dato::datoNat(0);
         _campoIndexadoNat.AgregarAdelante(InfoIndice(c, dato, dato, true));
