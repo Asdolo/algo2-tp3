@@ -313,7 +313,7 @@ string BaseDeDatos::campoJoin(string s1, string s2) const {
 
 Registro BaseDeDatos::Merge(Registro r1, Registro r2) {
     Registro res = r1;
- class Lista<struct tupString<Dato> >::const_Iterador ite = r1.vistaDicc();  
+ class Lista<struct tupString<Dato> >::const_Iterador ite = r2.vistaDicc();  
  while (ite.HaySiguiente()) {
         if (!(r1.def(ite.Siguiente().clave))) {
             res.definir(ite.Siguiente().clave, ite.Siguiente().significado);
