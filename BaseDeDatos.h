@@ -84,11 +84,12 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
     os << "     " << "Tablas: " << endl;
     Conj<string>::const_Iterador itTab = b.Tablas();
     while (itTab.HaySiguiente()) {
-        os << "||" << itTab.Siguiente() << "|| ";
+        os << b.dameTabla(itTab.Siguiente());
         itTab.Avanzar();
     }
     os << endl;
     os << "----------------------------" << endl;
+    
 
     os << "Tabla más accedida: " << b.tablaMaxima() << endl;
     os << "----------------------------" << endl;
@@ -109,6 +110,7 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
             }
             itTabSecund.Avanzar();
         }
+        itTab.Avanzar();
     }
     os << "----------------------------" << endl;
 

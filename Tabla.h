@@ -84,7 +84,6 @@ Tabla::~Tabla(){
 }
 
 Tabla& Tabla::operator=(const Tabla& t){
-  _cantAccesos = t._cantAccesos;
   _campos = t._campos;
   _nombre = t._nombre;
   _claves = t._claves;
@@ -95,6 +94,7 @@ Tabla& Tabla::operator=(const Tabla& t){
     agregarRegistro(it.Siguiente());
     it.Avanzar();
   }
+  _cantAccesos = t._cantAccesos;
   return *this;
 }
 
@@ -347,8 +347,8 @@ void Tabla::indexar(const string& c) {
             _campoIndexadoString.Primero().vacio = false;
             _campoIndexadoString.Primero().max = it.Siguiente().itReg.Siguiente().obtener(c);
             _campoIndexadoString.Primero().min = it.Siguiente().itReg.Siguiente().obtener(c);
-            std::cout << "Nuevo máx: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
-            std::cout << "Nuevo min: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
+           // std::cout << "Nuevo máx: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
+           // std::cout << "Nuevo min: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
 
         }
 
@@ -362,11 +362,11 @@ void Tabla::indexar(const string& c) {
             it.Siguiente().itString = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(it_str);
 
             if (it.Siguiente().itReg.Siguiente().obtener(c) > _campoIndexadoString.Primero().max) {
-              std::cout << "Nuevo máx: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
+              //std::cout << "Nuevo máx: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
                 _campoIndexadoString.Primero().max = it.Siguiente().itReg.Siguiente().obtener(c);
             }
             if (it.Siguiente().itReg.Siguiente().obtener(c) < _campoIndexadoString.Primero().min) {
-              std::cout << "Nuevo min: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
+              //std::cout << "Nuevo min: " << it.Siguiente().itReg.Siguiente().obtener(c).dame_valorStr() << std::endl;
                 _campoIndexadoString.Primero().min = it.Siguiente().itReg.Siguiente().obtener(c);
             }
             it.Avanzar();
