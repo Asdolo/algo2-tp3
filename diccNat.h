@@ -302,6 +302,7 @@ bool diccNat<Significado>::Iterador::hayMas() const{
 
 template<class Significado>
 tuplaDicc<Significado> diccNat<Significado>::Iterador::actual() const{
+  assert(hayMas());
   tuplaDicc<Significado> res = { iter_.tope()->clave, *(iter_.tope()->significado) };
   return res;
 }

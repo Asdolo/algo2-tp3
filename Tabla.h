@@ -17,6 +17,7 @@ class Tabla {
 public:
 
     Tabla(const string& nombre, Conj<string> claves, Registro columnas);
+    ~Tabla();
 
     void agregarRegistro(Registro r);
     void borrarRegistro(Registro cr);
@@ -33,22 +34,24 @@ public:
     const Dato& maximo(string campo) const;
 
     friend ostream& operator<<(ostream& os, const Tabla& t);
-
-private:
+    Tabla operator=(const Tabla& t);
 
     struct InfoIndice {
-        InfoIndice(string c, Dato mx, Dato mn, bool v) : campo(c), max(mx), min(mn), vacio(v) {};
-        string campo;
-        Dato max;
-        Dato min;
-        bool vacio;
+      InfoIndice(string c, Dato mx, Dato mn, bool v) : campo(c), max(mx), min(mn), vacio(v) {};
+      string campo;
+      Dato max;
+      Dato min;
+      bool vacio;
     };
     struct IteradoresIndices {
-        IteradoresIndices(Conj<Registro>::Iterador it) : itReg(it), itNat(NULL), itString(NULL) {}
-        Conj<Registro>::Iterador itReg;
-        Lista<Lista<IteradoresIndices>::Iterador> ::Iterador* itNat;
-        Lista<Lista<IteradoresIndices>::Iterador> ::Iterador* itString;
+      IteradoresIndices(Conj<Registro>::Iterador it) : itReg(it), itNat(NULL), itString(NULL) {}
+      Conj<Registro>::Iterador itReg;
+      Lista<Lista<IteradoresIndices>::Iterador> ::Iterador* itNat;
+      Lista<Lista<IteradoresIndices>::Iterador> ::Iterador* itString;
     };
+    Lista<IteradoresIndices> _iteradores;
+private:
+
     diccString<bool> _campos;
     diccString<Lista<Lista<IteradoresIndices>::Iterador> > _indicesString;
     diccNat<Lista<Lista<IteradoresIndices>::Iterador> > _indicesNat;
@@ -59,7 +62,6 @@ private:
     unsigned int _cantAccesos;
     Conj<Registro> _registros;
 
-    Lista<IteradoresIndices> _iteradores;
 };
 
 Tabla::Tabla(const string& nombre, Conj<string> claves, Registro columnas) : _nombre(nombre), _claves(claves), _cantAccesos(0) {
@@ -69,6 +71,31 @@ Tabla::Tabla(const string& nombre, Conj<string> claves, Registro columnas) : _no
         _campos.definir(iter.Siguiente().clave, es_Nat);
         iter.Avanzar();
     }
+}
+
+Tabla::~Tabla(){
+  Lista<IteradoresIndices>::Iterador destructive_It = _iteradores.CrearIt();
+  while ( destructive_It.HaySiguiente() ){
+    if ( destructive_It.Siguiente().itNat != NULL ) delete destructive_It.Siguiente().itNat;
+    if ( destructive_It.Siguiente().itString != NULL ) delete destructive_It.Siguiente().itString;
+    destructive_It.Avanzar();
+  }
+}
+
+Tabla Tabla::operator=(const Tabla& t){
+  _cantAccesos = t._cantAccesos;
+  _campos = t._campos;
+  _nombre = t._nombre;
+  _claves = t._claves;
+  _campoIndexadoNat = t._campoIndexadoNat;
+  _campoIndexadoString = t._campoIndexadoNat;
+  Conj<Registro>::const_Iterador it = t._registros.CrearIt();
+  while ( it.HaySiguiente() ) {
+    std::cout << "AGREGADO:" << it.Siguiente() << std::endl;
+    agregarRegistro(it.Siguiente());
+    it.Avanzar();
+  }
+  return *this;
 }
 
 string Tabla::nombre() const {
@@ -118,6 +145,7 @@ void Tabla::borrarRegistro(Registro cr) {
             Lista<IteradoresIndices>::Iterador iterador = it.Siguiente();
 
             iterador.Siguiente().itNat->EliminarSiguiente();
+            delete iterador.Siguiente().itNat;
             _indicesNat.borrar(dato.dame_valorNat());
 
             Registro regi = iterador.Siguiente().itReg.Siguiente();
@@ -130,6 +158,7 @@ void Tabla::borrarRegistro(Registro cr) {
                 }
             }
             iterador.Siguiente().itReg.EliminarSiguiente();
+            iterador.EliminarSiguiente();
 
 
         }
@@ -140,6 +169,7 @@ void Tabla::borrarRegistro(Registro cr) {
             Lista<IteradoresIndices>::Iterador iterador = it.Siguiente();
 
             iterador.Siguiente().itString->EliminarSiguiente();
+            delete iterador.Siguiente().itString;
             _indicesString.borrar(dato.dame_valorStr());
 
             Registro regi = iterador.Siguiente().itReg.Siguiente();
@@ -184,24 +214,27 @@ void Tabla::borrarRegistro(Registro cr) {
         }
     }
     //Esto antes estaba en cada rama de indice, ahora es global
-    diccNat<Lista<Lista<IteradoresIndices>::Iterador> >::Iterador temp_Nat = _indicesNat.crearIt();
-    if (!temp_Nat.hayMas()) {
-        _campoIndexadoNat.Primero().vacio = true;
-    } else {
-            Dato max = Dato::datoNat(_indicesNat.max().clave);
-            _campoIndexadoNat.Primero().max = max;
-            Dato min = Dato::datoNat(_indicesNat.min().clave);
-            _campoIndexadoNat.Primero().min = min;
+     if (!_campoIndexadoNat.EsVacia()) {
+        diccNat<Lista<Lista<IteradoresIndices>::Iterador> >::Iterador temp_Nat = _indicesNat.crearIt();
+        if (!temp_Nat.hayMas()) {
+                _campoIndexadoNat.Primero().vacio = true;
+        } else {
+                Dato max = Dato::datoNat(_indicesNat.max().clave);
+                _campoIndexadoNat.Primero().max = max;
+                Dato min = Dato::datoNat(_indicesNat.min().clave);
+                _campoIndexadoNat.Primero().min = min;
+        }
     }
-
-    Lista<tupString<Lista<Lista<IteradoresIndices>::Iterador> > >::const_Iterador temp_Str = _indicesString.vistaDicc();
-    if (! temp_Str.HaySiguiente() ) {
-        _campoIndexadoString.Primero().vacio = true;
-    } else {
-            Dato max = Dato::datoString(_indicesString.max());
-            _campoIndexadoString.Primero().max = max;
-            Dato min = Dato::datoString(_indicesString.min());
-            _campoIndexadoString.Primero().min = min;
+    if (!_campoIndexadoString.EsVacia()) {
+        Lista<tupString<Lista<Lista<IteradoresIndices>::Iterador> > >::const_Iterador temp_Str = _indicesString.vistaDicc();
+        if (! temp_Str.HaySiguiente() ) {
+            _campoIndexadoString.Primero().vacio = true;
+        } else {
+                Dato max = Dato::datoString(_indicesString.max());
+                _campoIndexadoString.Primero().max = max;
+                Dato min = Dato::datoString(_indicesString.min());
+                _campoIndexadoString.Primero().min = min;
+        }
     }
 }
 
@@ -216,7 +249,6 @@ void Tabla::agregarRegistro(Registro r) {
             _campoIndexadoNat.Primero().min = r.obtener(_campoIndexadoNat.Primero().campo);
             _campoIndexadoNat.Primero().max = r.obtener(_campoIndexadoNat.Primero().campo);
             _campoIndexadoNat.Primero().vacio = false;
-
         } else {
             unsigned int nPaMinMax = r.obtener(_campoIndexadoNat.Primero().campo).dame_valorNat();
             if (nPaMinMax < _campoIndexadoNat.Primero().min.dame_valorNat()) {
