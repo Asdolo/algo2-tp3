@@ -188,86 +188,128 @@ Driver::Dato Driver::maximo(const NombreTabla& tabla, const NombreCampo& columna
 
 aed2::Conj<Driver::Registro> Driver::buscar(const NombreTabla& tabla, const Registro& criterio) const
 {
-  // TODO ...
-  assert(false);
+  aed2::Conj<Driver::Registro> res;
+  res = db.busquedaCriterio(criterio,tabla);
+  return res;
 }
 
 aed2::Conj<NombreTabla> Driver::tablas() const
 {
-  return bd.Tablas();
+  return db.Tablas();
 }
 
 NombreTabla Driver::tablaMaxima() const
 {
-  return bd.tablaMaxima();
+  return db.tablaMaxima();
 }
 
 // Indices
 
 bool Driver::tieneIndiceNat(const NombreTabla& tabla) const
 {
-  // TODO ...
-  assert(false);
+   bool res = false;
+  tp3::Tabla t = db.dameTabla(tabla);
+  Conj<string> indices = t.indices();
+  Conj<string>::const_Iterador it = indices.CrearIt();
+  while(it.HaySiguiente()){
+    if (t.tipoCampo(it.Siguiente()))
+    {
+      res=true;
+    }
+    it.Avanzar();
+  }
+  return res;
 }
 
 bool Driver::tieneIndiceString(const NombreTabla& tabla) const
 {
-  // TODO ...
-  assert(false);
+  bool res = false;
+  tp3::Tabla t = db.dameTabla(tabla);
+  Conj<string> indices = t.indices();
+  Conj<string>::const_Iterador it = indices.CrearIt();
+  while(it.HaySiguiente()){
+    if (!t.tipoCampo(it.Siguiente()))
+    {
+      res=true;
+    }
+    it.Avanzar();
+  }
+  return res;
 }
 
 NombreCampo Driver::campoIndiceNat(const NombreTabla& tabla) const
 {
-  // TODO ...
-  assert(false);
+  tp3::Tabla t = db.dameTabla(tabla);
+  Driver::NombreCampo res;
+  Conj<string> indices = t.indices();
+  Conj<string>::const_Iterador it = indices.CrearIt();
+  while(it.HaySiguiente()){
+    if (t.tipoCampo(it.Siguiente()))
+    {
+      res=it.Siguiente();
+    }
+    it.Avanzar();
+  }
+  return res;
 }
 
 NombreCampo Driver::campoIndiceString(const NombreTabla& tabla) const
 {
-  // TODO ...
-  assert(false);
+  tp3::Tabla t = db.dameTabla(tabla);
+  Driver::NombreCampo res;
+  Conj<string> indices = t.indices();
+  Conj<string>::const_Iterador it = indices.CrearIt();
+  while(it.HaySiguiente()){
+    if (!t.tipoCampo(it.Siguiente()))
+    {
+      res=it.Siguiente();
+    }
+    it.Avanzar();
+  }
+  return res;
 }
 
 void Driver::crearIndiceNat(const NombreTabla& tabla, const NombreCampo& campo)
 {
-  // TODO ...
-  assert(false);
+  tp3::Tabla t& = db.dameTabla(tabla);
+  t.indexar(campo);
 }
 
 void Driver::crearIndiceString(const NombreTabla& tabla, const NombreCampo& campo)
 {
-  // TODO ...
-  assert(false);
+  tp3::Tabla& t = db.dameTabla(tabla);
+  t.indexar(campo);
 }
 
 // Joins
 
 bool Driver::hayJoin(const NombreTabla& tabla1, const NombreTabla& tabla2) const
 {
-  // TODO ...
-  assert(false);
+  db.hayJoin(tabla1,tabla2);
 }
 
 NombreCampo Driver::campoJoin(const NombreTabla& tabla1, const NombreTabla& tabla2) const
 {
-  // TODO ...
-  assert(false);
+return db.campoJoin(tabla1,tabla2);
 }
 
 void Driver::generarVistaJoin(const NombreTabla& tabla1, const NombreTabla& tabla2, const NombreCampo& campo)
 {
-  // TODO ...
-  assert(false);
+  db.generarVistaJoin(tabla1,tabla2,campo);
 }
 
 void Driver::borrarVistaJoin(const NombreTabla& tabla1, const NombreTabla& tabla2)
 {
-  // TODO ...
-  assert(false);
+  db.borrarJoin(tabla1,tabla2);
 }
 
 aed2::Conj<Driver::Registro> Driver::vistaJoin(const NombreTabla& tabla1, const NombreTabla& tabla2)/* const*/
 {
-  // TODO ...
-  assert(false);
+  tp3::diccString<tp3::Dato>::const_Iterador it = db.vistaJoin(tabla1.nombre(),tabla2.nombre());
+  aed2::Conj<Driver::Registro> res;
+  while(it.HaySiguiente()){
+    res.AgregarRapido(it.Siguiente());
+    it.Avanzar();
+  }
+  return res;
 }
