@@ -99,6 +99,12 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
         while (itTabSecund.HaySiguiente()) {
             if (b.hayJoin(itTab.Siguiente(), itTabSecund.Siguiente())) {
                 os << "Join " << itTab.Siguiente() << " --> " << itTabSecund.Siguiente() << endl;
+              Conj<Registro> registrosDelJoin = b._registrosDelJoin.obtener(itTab.Siguiente()).obtener(itTabSecund.Siguiente());
+              Conj<Registro>::Iterador itReg= registrosDelJoin.CrearIt();
+              while(itReg.HaySiguiente()){
+                  os << itReg.Siguiente() << endl;
+                  itReg.Avanzar();
+              }
             }
             itTabSecund.Avanzar();
         }
@@ -228,7 +234,8 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
                 regMergeado = Merge(it.Siguiente(), coincis.Primero());
             }
         }
-        res.AgregarRapido(regMergeado);
+        Lista<struct tupString<Dato> >::const_Iterador ver_Vacio = regMergeado.vistaDicc();
+        if (ver_Vacio.HaySiguiente()) res.AgregarRapido(regMergeado);
         it.Avanzar();
     }
     return res;
