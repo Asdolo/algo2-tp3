@@ -26,7 +26,7 @@ public:
     Conj<string> claves() const;
     Lista<Registro> buscar(const string& campo, const Dato& d) const;
     Conj<string> indices() const;
-    Lista<tupString<bool> >::const_Iterador campos() const;
+    const Conj<string> campos() const;
     bool tipoCampo(const string& campo) const; //const bool->no me cambien los tipos desde afuera
     const Conj<Registro>& registros() const;
     unsigned int cantidadDeAccesos() const;
@@ -117,8 +117,8 @@ Conj<string> Tabla::indices() const {
     return res;
 }
 
-Lista<tupString<bool> >::const_Iterador Tabla::campos() const { //Ver si hay manera de devolver el iterador acá
-  return _campos.vistaDicc();
+const Conj<string> Tabla::campos() const {
+  return _campos.claves();
 }
 
 bool Tabla::tipoCampo(const string& c) const {
@@ -421,9 +421,9 @@ ostream& operator<<(ostream& os, const Tabla& t) {
   os << "Cant Accesos: " << t.cantidadDeAccesos() << endl;
 
   os << "Campos: ";
-  Lista<tupString<bool> >::const_Iterador it = t.campos();
+  Conj<string>::const_Iterador it = t.campos().CrearIt();
   while(it.HaySiguiente()){
-    os << " | " << it.Siguiente().clave << "(" << it.Siguiente().significado << ")";
+    os << " | " << it.Siguiente() << "(" << t.tipoCampo(it.Siguiente()) << ")";
     it.Avanzar();
   }
   os << " | " << endl;

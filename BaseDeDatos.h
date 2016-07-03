@@ -268,15 +268,164 @@ Registro BaseDeDatos::Merge(Registro r1, Registro r2) {
 }
 
 Conj<Registro>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) {
-    //COMPLETAR!!
+    string campito = _hayJoin.obtener(s1).obtener(s2).campoJoin;
+    Tabla tabla1 = _nombreATabla.obtener(s1);
+    bool esNat = tabla1.tipoCampo(campito);
+    Tabla tabla2 = _nombreATabla.obtener(s2);
+
+    if ( esNat ) {
+      diccNat<Conj<Registro>::Iterador > diccDeIters = _joinPorCampoNat.obtener(s1).obtener(s2);
+      Lista<tupInterna>::Iterador itT1 = _hayJoin.obtener(s1).obtener(s2).cambiosT1.CrearIt();
+
+      while ( itT1.HaySiguiente() ) {
+        tupInterna tupSiguiente = itT1.Siguiente();
+        Dato claveNat = tupSiguiente.reg.obtener(campito);
+        Lista<Registro> coincidencias = tabla2.buscar(campito, claveNat);
+
+        if ( !coincidencias.EsVacia() ) {
+          Registro regT2 = coincidencias.Primero();
+
+          if ( tupSiguiente.agregar ) {
+            Registro registroMergeado = Merge(tupSiguiente.reg, regT2);
+            Conj<Registro>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
+            diccDeIters.definir(claveNat.dame_valorNat(), iter);
+          } else {
+            diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
+            diccDeIters.borrar(claveNat.dame_valorNat());
+          }
+        }
+
+        itT1.EliminarSiguiente();
+      }
+
+      Lista<tupInterna>::Iterador itT2 = _hayJoin.obtener(s1).obtener(s2).cambiosT2.CrearIt();
+
+      while ( itT2.HaySiguiente() ) {
+        tupInterna tupSiguiente = itT2.Siguiente();
+        Dato claveNat = tupSiguiente.reg.obtener(campito);
+        Lista<Registro> coincidencias = tabla1.buscar(campito, claveNat);
+
+        if ( !coincidencias.EsVacia() && !diccDeIters.def(claveNat.dame_valorNat()) ) {
+          Registro regT1 = coincidencias.Primero();
+
+          if ( tupSiguiente.agregar ) {
+            Registro registroMergeado = Merge(regT1, tupSiguiente.reg);
+            Conj<Registro>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
+            diccDeIters.definir(claveNat.dame_valorNat(), iter);
+          } else {
+            diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
+            diccDeIters.borrar(claveNat.dame_valorNat());
+          }
+        }
+        itT2.EliminarSiguiente();
+      }
+
+    } else {
+
+      diccString<Conj<Registro>::Iterador > diccDeIters = _joinPorCampoString.obtener(s1).obtener(s2);
+      Lista<tupInterna>::Iterador itT1 = _hayJoin.obtener(s1).obtener(s2).cambiosT1.CrearIt();
+
+      while ( itT1.HaySiguiente() ) {
+        tupInterna tupSiguiente = itT1.Siguiente();
+        Dato claveString = tupSiguiente.reg.obtener(campito);
+        Lista<Registro> coincidencias = tabla2.buscar(campito, claveString);
+
+        if ( !coincidencias.EsVacia() ) {
+          Registro regT2 = coincidencias.Primero();
+
+          if ( tupSiguiente.agregar ) {
+            Registro registroMergeado = Merge(tupSiguiente.reg, regT2);
+            Conj<Registro>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
+            diccDeIters.definir(claveString.dame_valorStr(), iter);
+          } else {
+            diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
+            diccDeIters.borrar(claveString.dame_valorStr());
+          }
+        }
+
+        itT1.EliminarSiguiente();
+      }
+
+      Lista<tupInterna>::Iterador itT2 = _hayJoin.obtener(s1).obtener(s2).cambiosT2.CrearIt();
+
+      while ( itT2.HaySiguiente() ) {
+        tupInterna tupSiguiente = itT2.Siguiente();
+        Dato claveString = tupSiguiente.reg.obtener(campito);
+        Lista<Registro> coincidencias = tabla1.buscar(campito, claveString);
+
+        if ( !coincidencias.EsVacia() && !diccDeIters.def(claveString.dame_valorStr()) ) {
+          Registro regT1 = coincidencias.Primero();
+
+          if ( tupSiguiente.agregar ) {
+            Registro registroMergeado = Merge(regT1, tupSiguiente.reg);
+            Conj<Registro>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
+            diccDeIters.definir(claveString.dame_valorStr(), iter);
+          } else {
+            diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
+            diccDeIters.borrar(claveString.dame_valorStr());
+          }
+        }
+        itT2.EliminarSiguiente();
+      }
+    }
+    Conj<Registro>::const_Iterador res = _registrosDelJoin.obtener(s1).obtener(s2).CrearIt();
+    return res;
 }
 
 Conj<Registro> BaseDeDatos::busquedaCriterio(Registro crit, string t) const {
-    //COMPLETAR!!
-}
+    Tabla tabla = _nombreATabla.obtener(t);
+    bool termine = false;
+    Conj<Registro> res;
+    class Lista<struct tupString<Dato> >::const_Iterador itCrit = crit.vistaDicc();
+    while (itCrit.HaySiguiente() && !termine) {
+        string campoCrit = itCrit.Siguiente().clave;
+        if (! tabla.campos().Pertenece(campoCrit) ) {
+            termine = true;
+        }
+        itCrit.Avanzar();
+    }
+    Conj<string>::Iterador itIndices = tabla.indices().CrearIt();
+    while (itIndices.HaySiguiente() && !termine) {
+        if (crit.def(itIndices.Siguiente())) {
+            string campoIndice = itIndices.Siguiente();
+            Dato valorCampo = crit.obtener(campoIndice);
+            Lista<Registro> coincis = tabla.buscar(campoIndice,valorCampo);
+            Lista<Registro>::const_Iterador itCoincis = coincis.CrearIt();
+            while (itCoincis.HaySiguiente()) {
+                if (coincidenTodosCrit(itCoincis.Siguiente(),crit)) {
+                    res.AgregarRapido(itCoincis.Siguiente());
+                }
+                itCoincis.Avanzar();
+            }
+            termine = true;
+            itIndices.Avanzar();
+        }
+    }
 
+    if (!termine) {
+        Conj<Registro>::const_Iterador itRegs =  tabla.registros().CrearIt();
+        while (itRegs.HaySiguiente()) {
+            if (coincidenTodosCrit(itRegs.Siguiente(),crit)){
+                res.AgregarRapido(itRegs.Siguiente());
+
+            }
+            itRegs.Avanzar();
+        }
+    }
+
+    return res;
+}
 bool BaseDeDatos::coincidenTodosCrit(Registro crit, Registro r) {
-    //COMPLETAR!!
+    class Lista<struct tupString<Dato> >::const_Iterador itCrit =crit.vistaDicc();
+    bool res = true;
+    while(itCrit.HaySiguiente() && res){
+        tupString<Dato> tuplaCrit = itCrit.Siguiente();
+        if( r.obtener(tuplaCrit.clave) != tuplaCrit.significado){
+            res=false;
+        }
+        itCrit.Avanzar();
+    }
+    return res;
 }
 
 string BaseDeDatos::tablaMaxima() const {
