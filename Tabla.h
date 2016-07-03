@@ -35,6 +35,7 @@ public:
 
     friend ostream& operator<<(ostream& os, const Tabla& t);
     Tabla operator=(const Tabla& t);
+    Tabla(const Tabla& other);
 
     struct InfoIndice {
       InfoIndice(string c, Dato mx, Dato mn, bool v) : campo(c), max(mx), min(mn), vacio(v) {};
@@ -88,7 +89,7 @@ Tabla Tabla::operator=(const Tabla& t){
   _nombre = t._nombre;
   _claves = t._claves;
   _campoIndexadoNat = t._campoIndexadoNat;
-  _campoIndexadoString = t._campoIndexadoNat;
+  _campoIndexadoString = t._campoIndexadoString;
   Conj<Registro>::const_Iterador it = t._registros.CrearIt();
   while ( it.HaySiguiente() ) {
     std::cout << "AGREGADO:" << it.Siguiente() << std::endl;
@@ -96,6 +97,10 @@ Tabla Tabla::operator=(const Tabla& t){
     it.Avanzar();
   }
   return *this;
+}
+
+Tabla::Tabla(const Tabla& other){
+  *this = other;
 }
 
 string Tabla::nombre() const {
@@ -421,7 +426,8 @@ ostream& operator<<(ostream& os, const Tabla& t) {
   os << "Cant Accesos: " << t.cantidadDeAccesos() << endl;
 
   os << "Campos: ";
-  Conj<string>::const_Iterador it = t.campos().CrearIt();
+  Conj<string> campos = t.campos();
+  Conj<string>::const_Iterador it = campos.CrearIt();
   while(it.HaySiguiente()){
     os << " | " << it.Siguiente() << "(" << t.tipoCampo(it.Siguiente()) << ")";
     it.Avanzar();
