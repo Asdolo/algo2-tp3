@@ -48,6 +48,7 @@ public:
 
     friend ostream& operator<<(ostream& os, const BaseDeDatos& b);
 
+    diccString<diccString<Conj<Registro > > > _registrosDelJoin;
 private:
 
     static Registro Merge(Registro r1, Registro r2);
@@ -72,7 +73,6 @@ private:
     Conj<string> _tablas;
     diccString<diccString<diccNat<Conj<Registro>::Iterador > > > _joinPorCampoNat;
     diccString<diccString<diccString<Conj<Registro>::Iterador > > > _joinPorCampoString;
-    diccString<diccString<Conj<Registro > > > _registrosDelJoin;
     diccString<diccString<tupBdd > > _hayJoin;
 };
 
@@ -97,12 +97,17 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
         Conj<string>::const_Iterador itTabSecund = b.Tablas();
 
         while (itTabSecund.HaySiguiente()) {
-            if (b.hayJoin(itTab.Siguiente(), itTabSecund.Siguiente())) {
-                os << "Join " << itTab.Siguiente() << " --> " << itTabSecund.Siguiente() << endl;
-            }
-            itTabSecund.Avanzar();
+             if (b.hayJoin(itTab.Siguiente(), itTabSecund.Siguiente())) {
+                 os << "Join " << itTab.Siguiente() << " --> " << itTabSecund.Siguiente() << endl;
+              Conj<Registro> registrosDelJoin = b._registrosDelJoin.obtener(itTab.Siguiente()).obtener(itTabSecund.Siguiente());
+              Conj<Registro>::Iterador itReg= registrosDelJoin.CrearIt();
+              while(itReg.HaySiguiente()){
+                  os << itReg.Siguiente() << endl;
+                  itReg.Avanzar();
+              }
+             }
+             itTabSecund.Avanzar();
         }
-        itTab.Avanzar();
     }
     os << "----------------------------" << endl;
 
@@ -218,7 +223,7 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
     Conj<Registro> res;
 
     while (it.HaySiguiente()) {
-         Registro regMergeado;
+        Registro regMergeado;
         Dato d = it.Siguiente().obtener(campo);
         Lista<Registro> coincis = tablaBusq.buscar(campo, d);
         if (!coincis.EsVacia()) {
@@ -228,7 +233,8 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
                 regMergeado = Merge(it.Siguiente(), coincis.Primero());
             }
         }
-        res.AgregarRapido(regMergeado);
+        Lista<struct tupString<Dato> >::const_Iterador ver_Vacio = regMergeado.vistaDicc();
+        if (ver_Vacio.HaySiguiente()) res.AgregarRapido(regMergeado);
         it.Avanzar();
     }
     return res;
@@ -271,7 +277,6 @@ Conj<Registro>::const_Iterador BaseDeDatos::generarVistaJoin(string t1, string t
             it.Avanzar();
         }
     }
-
     Conj<Registro>::const_Iterador res = _registrosDelJoin.obtener(t1).obtener(t2).CrearIt();
     return res;
 }

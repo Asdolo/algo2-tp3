@@ -93,17 +93,25 @@ using namespace std;
     bool Dato::operator<=(const Dato& otro) const{
     	assert( mismoTipo(*this, otro) );
       bool res;
-      if ( this->esNat() ){
+      bool seguir;
+      if ( esNat() ){
     		return this->valorNat <= otro.valorNat;
     	}
       else {
     		res = true;
+        seguir = true;
     		unsigned int i = 0;
-    		while( res && i < (this->valorStr).length() && i < (otro.valorStr).length() ){
-    			if ( this->valorStr[i] > otro.valorStr[i] ){
+    		while( seguir && i < (valorStr).length() && i < (otro.valorStr).length() ){
+    			if ( valorStr[i] > otro.valorStr[i] ){
     				res = false;
-    			}
-    			i++;
+            seguir = false;
+    			} else if (  valorStr[i] < otro.valorStr[i] ){
+            res = true;
+            seguir = false;
+          } else if ( i+1 == valorStr.length() || i+1 == otro.valorStr.length() ){
+            res = (valorStr.length() <= otro.valorStr.length());
+          }
+          i++;
     		}
     	}
     	return res;
