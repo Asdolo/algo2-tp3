@@ -269,9 +269,9 @@ void Tabla::agregarRegistro(Registro r) {
             it.Siguiente().itNat = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_nat);
         } else {
             Lista<Lista<IteradoresIndices>::Iterador> nuevaLista;
-            Lista<Lista<IteradoresIndices>::Iterador>::Iterador iter_nat = nuevaLista.AgregarAtras(it);
-            it.Siguiente().itNat = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_nat);
             _indicesNat.definir(aux.dame_valorNat(), nuevaLista);
+            Lista<Lista<IteradoresIndices>::Iterador>::Iterador iter_nat = _indicesNat.obtener(aux.dame_valorNat()).AgregarAtras(it);
+            it.Siguiente().itNat = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_nat);
         }
     }
 
@@ -296,9 +296,9 @@ void Tabla::agregarRegistro(Registro r) {
             it.Siguiente().itString = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_str);
         } else {
             Lista<Lista<IteradoresIndices>::Iterador> nuevaLista;
-            Lista<Lista<IteradoresIndices>::Iterador>::Iterador iter_str = nuevaLista.AgregarAtras(it);
-            it.Siguiente().itString = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_str);
             _indicesString.definir(aux.dame_valorStr(), nuevaLista);
+            Lista<Lista<IteradoresIndices>::Iterador>::Iterador iter_str = _indicesString.obtener(aux.dame_valorStr()).AgregarAtras(it);
+            it.Siguiente().itString = new Lista<Lista<IteradoresIndices>::Iterador>::Iterador(iter_str);
         }
     }
 }
