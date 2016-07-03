@@ -216,14 +216,14 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
     it = tablaIt.registros().CrearIt();
 
     Conj<Registro> res;
-    Registro regMergeado;
+   
     while (it.HaySiguiente()) {
+         Registro regMergeado;
         Dato d = it.Siguiente().obtener(campo);
         Lista<Registro> coincis = tablaBusq.buscar(campo, d);
         if (!coincis.EsVacia()) {
             if (tablaBusq.nombre() == t1) {
                 regMergeado = Merge(coincis.Primero(), it.Siguiente());
-
             } else {
                 regMergeado = Merge(it.Siguiente(), coincis.Primero());
             }
@@ -313,9 +313,9 @@ string BaseDeDatos::campoJoin(string s1, string s2) const {
 
 Registro BaseDeDatos::Merge(Registro r1, Registro r2) {
     Registro res = r1;
-    class Lista<struct tupString<Dato> >::const_Iterador ite = r2.vistaDicc();
-    while (ite.HaySiguiente()) {
-        if (res.def(ite.Siguiente().clave)) {
+ class Lista<struct tupString<Dato> >::const_Iterador ite = r1.vistaDicc();  
+ while (ite.HaySiguiente()) {
+        if (!(r1.def(ite.Siguiente().clave))) {
             res.definir(ite.Siguiente().clave, ite.Siguiente().significado);
         }
         ite.Avanzar();
