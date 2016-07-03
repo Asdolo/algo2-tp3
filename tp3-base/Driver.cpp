@@ -65,7 +65,7 @@ bool Driver::Dato::operator != (const Dato& otro) const
 
 Driver::Driver()
 {
-  db = tp3::BaseDeDatos();
+  db = BaseDeDatos();
 }
 
 Driver::~Driver()
@@ -79,12 +79,12 @@ Driver::~Driver()
 void Driver::crearTabla(const NombreTabla& nombre, const aed2::Conj<Columna>& columnas, const aed2::Conj<NombreCampo>& claves)
 {
     // AED CONJ COLUMNAS -> TP3 REG
-    tp3::diccString<Dato> reg;
+    diccString<tp3::Dato> reg;
     aed2::Conj<Columna>::const_Iterador it = columnas.CrearIt();
     while ( it.HaySiguiente() ){
       bool esNat = (it.Siguiente().tipo == NAT);
       reg.definir( it.Siguiente().nombre , esNat );
-      it.Avanzar()
+      it.Avanzar();
     }
     Tabla tabla = Tabla(nombre, claves, reg);
     db.agregarTabla(tabla);
@@ -93,11 +93,11 @@ void Driver::crearTabla(const NombreTabla& nombre, const aed2::Conj<Columna>& co
 void Driver::insertarRegistro(const NombreTabla& tabla, const Registro& registro)
 {
   //AED REG -> TP3 REG
-  tp3::diccString<Dato> reg;
+  diccString<Dato> reg;
   aed2::Dicc<NombreCampo, Dato>::const_Iterador it = registro.CrearIt();
   while ( it.HaySiguiente() ){
-    tp3::Dato dato = it.SiguienteSignificado().esNat? tp3::Dato::datoNat(it.SiguienteSignificado().dameNat) :
-                                                      tp3::Dato::datoString(it.SiguienteSignificado().dameString);
+    Dato dato = it.SiguienteSignificado().esNat?  Dato::datoNat(it.SiguienteSignificado().dameNat) :
+                                                  Dato::datoString(it.SiguienteSignificado().dameString);
     reg.definir( it.SiguienteClave() , dato );
     it.Avanzar();
   }
@@ -159,12 +159,14 @@ aed2::Conj<Driver::Registro> Driver::registrosDeTabla(const NombreTabla& tabla) 
     tp3::diccString<Dato> actual = it.Siguiente();
     tp3::Lista<struct tupString<tp3::Dato> >::const_Iterador vistaReg = actual.vistaDicc();
     while ( vistaReg.HaySiguiente() ){
-      aed2::Dato dato = ;
-      reg.definir( vistaReg.Siguiente().clave, )
+      tp3::Dato dato_tp = vistaReg.Siguiente().significado;
+      Driver::Dato dato = dato_tp.esNat? Driver::Dato(dato_tp.dame_valorNat()) : Driver::Dato(dato_tp.dame_valorStr()) ;
+      reg.Definir( vistaReg.Siguiente().clave, dato);
+      vistaReg.Avanzar();
     }
-
+    res.Agregar(reg);
+    it.Avanzar();
   }
-
   return res;
 }
 
@@ -176,14 +178,20 @@ aed2::Nat Driver::cantidadDeAccesosDeTabla(const NombreTabla& tabla) const
 
 Driver::Dato Driver::minimo(const NombreTabla& tabla, const NombreCampo& columna) const
 {
-  // TODO ...
-  assert(false);
+  tp3::Tabla t = db.dameTabla(tabla);
+
+  tp3::Dato dato_tp = t.minimo(columna);
+  Driver::Dato dato = dato_tp.esNat? Driver::Dato(dato_tp.dame_valorNat()) : Driver::Dato(dato_tp.dame_valorStr()) ;
+  return dato;
 }
 
 Driver::Dato Driver::maximo(const NombreTabla& tabla, const NombreCampo& columna) const
 {
-  // TODO ...
-  assert(false);
+  tp3::Tabla t = db.dameTabla(tabla);
+
+  tp3::Dato dato_tp = t.maximo(columna);
+  Driver::Dato dato = dato_tp.esNat? Driver::Dato(dato_tp.dame_valorNat()) : Driver::Dato(dato_tp.dame_valorStr()) ;
+  return dato;
 }
 
 aed2::Conj<Driver::Registro> Driver::buscar(const NombreTabla& tabla, const Registro& criterio) const

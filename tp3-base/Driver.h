@@ -4,6 +4,7 @@
 #include "Tipos.h"
 #include "aed2/Conj.h"
 #include "aed2/TiposBasicos.h"
+#include "../tp3.h"
 
 namespace aed2
 {
@@ -242,7 +243,9 @@ class Driver
 
   private:
 
-    tp3::BaseDeDatos db;
+    BaseDeDatos db;
+
+
 
     /*
   private:
