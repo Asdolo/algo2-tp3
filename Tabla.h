@@ -34,7 +34,7 @@ public:
     const Dato& maximo(string campo) const;
 
     friend ostream& operator<<(ostream& os, const Tabla& t);
-    Tabla operator=(const Tabla& t);
+    Tabla& operator=(const Tabla& t);
     Tabla(const Tabla& other);
 
     struct InfoIndice {
@@ -83,7 +83,7 @@ Tabla::~Tabla(){
   }
 }
 
-Tabla Tabla::operator=(const Tabla& t){
+Tabla& Tabla::operator=(const Tabla& t){
   _cantAccesos = t._cantAccesos;
   _campos = t._campos;
   _nombre = t._nombre;
@@ -92,7 +92,6 @@ Tabla Tabla::operator=(const Tabla& t){
   _campoIndexadoString = t._campoIndexadoString;
   Conj<Registro>::const_Iterador it = t._registros.CrearIt();
   while ( it.HaySiguiente() ) {
-    std::cout << "AGREGADO:" << it.Siguiente() << std::endl;
     agregarRegistro(it.Siguiente());
     it.Avanzar();
   }
