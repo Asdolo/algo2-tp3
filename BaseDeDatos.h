@@ -124,6 +124,8 @@ BaseDeDatos::~BaseDeDatos(){
 }
 
 void BaseDeDatos::agregarTabla(Tabla t) {
+    assert(!_nombreATabla.def(t.nombre()));
+
     if (_tablaMasAccedida == NULL || _nombreATabla.obtener(*_tablaMasAccedida).cantidadDeAccesos() < t.cantidadDeAccesos()) {
         _tablaMasAccedida = new string(t.nombre());
       }
@@ -136,18 +138,22 @@ void BaseDeDatos::agregarTabla(Tabla t) {
 }
 
 void BaseDeDatos::insertarEntrada(Registro r, string s) {
-    Tabla tabla = _nombreATabla.obtener(s);
+    assert(_nombreATabla.def(s) && r.claves() == _nombreATabla.obtener(s).campos() );
+
+    Tabla& tabla = _nombreATabla.obtener(s);
     tabla.agregarRegistro(r);
     Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
     if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
         _tablaMasAccedida = &s;
     }
-    class Lista<struct tupString<tupBdd > >::const_Iterador iter = _hayJoin.obtener(s).vistaDicc(); //PROBLEMAAAAAAAAAAAA
+    class Lista<struct tupString<tupBdd > >::const_Iterador iter = _hayJoin.obtener(s).vistaDicc();
 
     while (iter.HaySiguiente()) {
         tupInterna tup;
         tup.reg = r;
         tup.agregar = true;
+        //MOD
+        _hayJoin.obtener(s).obtener(iter.Siguiente().clave).cambiosT1.AgregarAdelante(tup);
         //iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
         iter.Avanzar();
     }
@@ -165,6 +171,8 @@ void BaseDeDatos::insertarEntrada(Registro r, string s) {
 }
 
 void BaseDeDatos::Borrar(Registro cr, string t) {
+    assert(_nombreATabla.def(t));
+
     Tabla tabla = _nombreATabla.obtener(t);
     tabla.borrarRegistro(cr);
     Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
@@ -176,6 +184,8 @@ void BaseDeDatos::Borrar(Registro cr, string t) {
         tupInterna tup;
         tup.reg = cr;
         tup.agregar = false;
+        //MOD
+        _hayJoin.obtener(t).obtener(iter.Siguiente().clave).cambiosT1.AgregarAdelante(tup);
         //iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
         iter.Avanzar();
     }
@@ -190,10 +200,13 @@ void BaseDeDatos::Borrar(Registro cr, string t) {
         }
         iterTablas.Avanzar();
     }
-
 }
 
 Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo) const {
+    assert( _nombreATabla.def(t1) && _nombreATabla.def(t2) );
+    assert( _nombreATabla.obtener(t1).campos().Pertenece(campo) );
+    assert( _nombreATabla.obtener(t2).campos().Pertenece(campo) );
+
     Tabla tabla1 = _nombreATabla.obtener(t1);
     Tabla tabla2 = _nombreATabla.obtener(t2);
     Conj<Registro>::const_Iterador it;
@@ -222,6 +235,10 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
 }
 
 Conj<Registro>::const_Iterador BaseDeDatos::generarVistaJoin(string t1, string t2, string campo) {
+  assert( _nombreATabla.def(t1) && _nombreATabla.def(t2) );
+  assert( _nombreATabla.obtener(t1).claves().Pertenece(campo) );
+  assert( _nombreATabla.obtener(t2).claves().Pertenece(campo) );
+
     tupBdd aux;
     aux.campoJoin = campo;
     aux.cambiosT1 = Lista<tupInterna>();
@@ -260,6 +277,8 @@ Conj<Registro>::const_Iterador BaseDeDatos::generarVistaJoin(string t1, string t
 }
 
 void BaseDeDatos::BorrarJoin(string t1, string t2) {
+    assert( hayJoin(t1,t2) );
+
     _hayJoin.obtener(t1).borrar(t2);
     _registrosDelJoin.obtener(t1).borrar(t2);
     if (_joinPorCampoNat.obtener(t1).def(t2)) {
@@ -275,14 +294,20 @@ Conj<string>::const_Iterador BaseDeDatos::Tablas() const {
 }
 
 Tabla BaseDeDatos::dameTabla(string s) const {
+    assert( _nombreATabla.def(s) );
+
     return _nombreATabla.obtener(s);
 }
 
 bool BaseDeDatos::hayJoin(string s1, string s2) const {
+    assert (_nombreATabla.def(s1) && _nombreATabla.def(s2));
+
     return _hayJoin.obtener(s1).def(s2);
 }
 
 string BaseDeDatos::campoJoin(string s1, string s2) const {
+    assert( hayJoin(s1,s2) );
+
     return _hayJoin.obtener(s1).obtener(s2).campoJoin;
 }
 
@@ -299,6 +324,8 @@ Registro BaseDeDatos::Merge(Registro r1, Registro r2) {
 }
 
 Conj<Registro>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) {
+    assert( hayJoin(s1,s2) );
+
     string campito = _hayJoin.obtener(s1).obtener(s2).campoJoin;
     Tabla tabla1 = _nombreATabla.obtener(s1);
     bool esNat = tabla1.tipoCampo(campito);
@@ -404,6 +431,8 @@ Conj<Registro>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) {
 }
 
 Conj<Registro> BaseDeDatos::busquedaCriterio(Registro crit, string t) const {
+    assert( _nombreATabla.def(t) );
+
     Tabla tabla = _nombreATabla.obtener(t);
     bool termine = false;
     Conj<Registro> res;
@@ -461,6 +490,7 @@ bool BaseDeDatos::coincidenTodosCrit(Registro crit, Registro r) {
 }
 
 string BaseDeDatos::tablaMaxima() const {
+    assert (_tablaMasAccedida != NULL);
     return (*_tablaMasAccedida);
 }
 
