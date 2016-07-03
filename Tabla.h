@@ -151,12 +151,14 @@ void Tabla::borrarRegistro(Registro cr) {
 
             iterador.Siguiente().itNat->EliminarSiguiente();
             delete iterador.Siguiente().itNat;
+            iterador.Siguiente().itNat = NULL;
             _indicesNat.borrar(dato.dame_valorNat());
 
             Registro regi = iterador.Siguiente().itReg.Siguiente();
             if (iterador.Siguiente().itString != NULL){
                 iterador.Siguiente().itString->EliminarSiguiente();
                 delete iterador.Siguiente().itString;
+                iterador.Siguiente().itString = NULL;
                 string valorIndex = regi.obtener(_campoIndexadoString.Primero().campo).dame_valorStr();
                 if ( _indicesString.obtener(valorIndex).EsVacia() ){
                     _indicesString.borrar(valorIndex);
@@ -175,12 +177,14 @@ void Tabla::borrarRegistro(Registro cr) {
 
             iterador.Siguiente().itString->EliminarSiguiente();
             delete iterador.Siguiente().itString;
+            iterador.Siguiente().itString = NULL;
             _indicesString.borrar(dato.dame_valorStr());
 
             Registro regi = iterador.Siguiente().itReg.Siguiente();
             if (iterador.Siguiente().itNat != NULL){
                 iterador.Siguiente().itNat->EliminarSiguiente();
                 delete iterador.Siguiente().itNat;
+                iterador.Siguiente().itNat = NULL;
                 unsigned int valorIndex = regi.obtener(_campoIndexadoNat.Primero().campo).dame_valorNat();
                 if ( _indicesNat.obtener(valorIndex).EsVacia() ){
                     _indicesNat.borrar(valorIndex);
@@ -199,6 +203,7 @@ void Tabla::borrarRegistro(Registro cr) {
                 if (iter.Siguiente().itNat != NULL){
                     iter.Siguiente().itNat->EliminarSiguiente();
                     delete iter.Siguiente().itNat;
+                    iter.Siguiente().itNat = NULL;
                     unsigned int valorIndex = regi.obtener(_campoIndexadoNat.Primero().campo).dame_valorNat();
                     if ( _indicesNat.obtener(valorIndex).EsVacia() ){
                         _indicesNat.borrar(valorIndex);
@@ -207,6 +212,7 @@ void Tabla::borrarRegistro(Registro cr) {
                 if (iter.Siguiente().itString != NULL){
                     iter.Siguiente().itString->EliminarSiguiente();
                     delete iter.Siguiente().itString;
+                    iter.Siguiente().itString = NULL;
                     string valorIndex = regi.obtener(_campoIndexadoString.Primero().campo).dame_valorStr();
                     if ( _indicesString.obtener(valorIndex).EsVacia() ){
                         _indicesString.borrar(valorIndex);
