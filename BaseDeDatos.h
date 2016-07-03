@@ -20,6 +20,8 @@ public:
 
     BaseDeDatos();
 
+    ~BaseDeDatos();
+
     void agregarTabla(Tabla t);
 
     void insertarEntrada(Registro r, string s);
@@ -43,6 +45,8 @@ public:
     Conj<Registro>::const_Iterador vistaJoin(string t1, string t2);
 
     string tablaMaxima() const;
+
+    friend ostream& operator<<(ostream& os, const BaseDeDatos& b);
 
 private:
 
@@ -75,23 +79,54 @@ private:
 
 bool operator==(const BaseDeDatos& b1, const BaseDeDatos& b2); //Se usa?
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const BaseDeDatos&); //Por qué el template?
+ostream& operator<<(ostream& os, const BaseDeDatos& b) {
+    os << "----------------------------" << endl;
+    os << "     " << "Tablas: " << endl;
+    Conj<string>::const_Iterador itTab = b.Tablas();
+    while (itTab.HaySiguiente()) {
+        os << "||" << itTab.Siguiente() << "|| ";
+        itTab.Avanzar();
+    }
+    os << endl;
+    os << "----------------------------" << endl;
+
+    os << "Tabla más accedida: " << b.tablaMaxima() << endl;
+    os << "----------------------------" << endl;
+    itTab = b.Tablas();
+    while (itTab.HaySiguiente()) {
+        Conj<string>::const_Iterador itTabSecund = b.Tablas();
+
+        while (itTabSecund.HaySiguiente()) {
+            if (b.hayJoin(itTab.Siguiente(), itTabSecund.Siguiente())) {
+                os << "Join " << itTab.Siguiente() << " --> " << itTabSecund.Siguiente() << endl;
+            }
+            itTabSecund.Avanzar();
+        }
+        itTab.Avanzar();
+    }
+    os << "----------------------------" << endl;
+
+    return os;
+}
 
 BaseDeDatos::BaseDeDatos() :
-  _tablaMasAccedida(NULL),
-  _nombreATabla(diccString<Tabla>()),
-  _tablas(Conj<string>()),
-  _hayJoin(diccString<diccString<tupBdd > >()),
-  _joinPorCampoString(diccString<diccString<diccString<Conj<Registro>::Iterador > > >()),
-  _joinPorCampoNat(diccString<diccString<diccNat<Conj<Registro>::Iterador > > >()),
-  _registrosDelJoin(diccString<diccString<Conj<Registro > > >())
+  _tablaMasAccedida   (NULL),
+  _nombreATabla       (diccString<Tabla>()),
+  _tablas             (Conj<string>()),
+  _hayJoin            (diccString<diccString<tupBdd > >()),
+  _joinPorCampoString (diccString<diccString<diccString<Conj<Registro>::Iterador > > >()),
+  _joinPorCampoNat    (diccString<diccString<diccNat<Conj<Registro>::Iterador > > >()),
+  _registrosDelJoin   (diccString<diccString<Conj<Registro > > >())
 {}
+
+BaseDeDatos::~BaseDeDatos(){
+  if (_tablaMasAccedida != NULL) delete _tablaMasAccedida;
+}
 
 void BaseDeDatos::agregarTabla(Tabla t) {
     if (_tablaMasAccedida == NULL || _nombreATabla.obtener(*_tablaMasAccedida).cantidadDeAccesos() < t.cantidadDeAccesos()) {
         _tablaMasAccedida = new string(t.nombre());
-    }
+      }
     _nombreATabla.definir(t.nombre(), t);
     _tablas.AgregarRapido(t.nombre());
     _hayJoin.definir(t.nombre(), diccString<tupBdd >());
@@ -162,15 +197,11 @@ Conj<Registro> BaseDeDatos::combinarRegistros(string t1, string t2, string campo
     Tabla tabla1 = _nombreATabla.obtener(t1);
     Tabla tabla2 = _nombreATabla.obtener(t2);
     Conj<Registro>::const_Iterador it;
-    Tabla tablaBusq = tabla1;
-    if (tabla1.indices().Pertenece(campo)) {
-        Tabla tablaIt = tabla2;
-        it = tablaIt.registros().CrearIt();
-    } else {
-        Tabla tablaIt = tabla1;
-        it = tablaIt.registros().CrearIt();
-        tablaBusq = tabla2;
-    }
+
+    Tabla tablaIt = (tabla1.indices().Pertenece(campo))? tabla2 : tabla1;
+    Tabla tablaBusq = (tabla1.indices().Pertenece(campo))? tabla1 : tabla2;
+    it = tablaIt.registros().CrearIt();
+
     Conj<Registro> res;
     Registro regMergeado;
     while (it.HaySiguiente()) {
@@ -415,6 +446,7 @@ Conj<Registro> BaseDeDatos::busquedaCriterio(Registro crit, string t) const {
 
     return res;
 }
+
 bool BaseDeDatos::coincidenTodosCrit(Registro crit, Registro r) {
     class Lista<struct tupString<Dato> >::const_Iterador itCrit =crit.vistaDicc();
     bool res = true;
