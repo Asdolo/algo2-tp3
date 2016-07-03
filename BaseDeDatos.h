@@ -48,7 +48,6 @@ public:
 
     friend ostream& operator<<(ostream& os, const BaseDeDatos& b);
 
-    diccString<diccString<Conj<Registro > > > _registrosDelJoin;
 private:
 
     static Registro Merge(Registro r1, Registro r2);
@@ -68,6 +67,7 @@ private:
       Lista<tupInterna> cambiosT2;
     };
 
+    diccString<diccString<Conj<Registro > > > _registrosDelJoin;
     string* _tablaMasAccedida;
     diccString<Tabla> _nombreATabla;
     Conj<string> _tablas;
