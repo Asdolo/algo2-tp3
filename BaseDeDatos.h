@@ -109,6 +109,7 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
             }
             itTabSecund.Avanzar();
         }
+        itTab.Avanzar();
     }
     os << "----------------------------" << endl;
 

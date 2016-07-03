@@ -84,7 +84,6 @@ Tabla::~Tabla(){
 }
 
 Tabla& Tabla::operator=(const Tabla& t){
-  _cantAccesos = t._cantAccesos;
   _campos = t._campos;
   _nombre = t._nombre;
   _claves = t._claves;
@@ -95,6 +94,7 @@ Tabla& Tabla::operator=(const Tabla& t){
     agregarRegistro(it.Siguiente());
     it.Avanzar();
   }
+  _cantAccesos = t._cantAccesos;
   return *this;
 }
 
