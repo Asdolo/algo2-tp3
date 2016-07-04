@@ -14,19 +14,19 @@ namespace tp3{
 class Tabla {
 public:
 
-    Tabla(const string& nombre, Conj<string> claves, Registro columnas);
+    Tabla(const string& nombre, Conj<string> claves,Registro_tp3 columnas);
     ~Tabla();
 
-    void agregarRegistro(Registro r);
-    void borrarRegistro(Registro cr);
+    void agregarRegistro(Registro_tp3 r);
+    void borrarRegistro(Registro_tp3 cr);
     void indexar(const string& c);
     string nombre() const;
     Conj<string> claves() const;
-    Lista<Registro> buscar(const string& campo, const Dato& d) const;
+    Lista<Registro_tp3> buscar(const string& campo, const Dato& d) const;
     Conj<string> indices() const;
     const Conj<string> campos() const;
     bool tipoCampo(const string& campo) const; //const bool->no me cambien los tipos desde afuera
-    const Conj<Registro>& registros() const;
+    const Conj<Registro_tp3>& registros() const;
     unsigned int cantidadDeAccesos() const;
     const Dato& minimo(string campo) const;
     const Dato& maximo(string campo) const;
@@ -43,8 +43,8 @@ public:
       bool vacio;
     };
     struct IteradoresIndices {
-      IteradoresIndices(Conj<Registro>::Iterador it) : itReg(it), itNat(NULL), itString(NULL) {}
-      Conj<Registro>::Iterador itReg;
+      IteradoresIndices(Conj<Registro_tp3>::Iterador it) : itReg(it), itNat(NULL), itString(NULL) {}
+      Conj<Registro_tp3>::Iterador itReg;
       Lista<Lista<IteradoresIndices>::Iterador> ::Iterador* itNat;
       Lista<Lista<IteradoresIndices>::Iterador> ::Iterador* itString;
     };
@@ -59,11 +59,11 @@ private:
     Lista<InfoIndice> _campoIndexadoNat;
     Lista<InfoIndice> _campoIndexadoString;
     unsigned int _cantAccesos;
-    Conj<Registro> _registros;
+    Conj<Registro_tp3> _registros;
 
 };
 
-Tabla::Tabla(const string& nombre, Conj<string> claves, Registro columnas) : _nombre(nombre), _claves(claves), _cantAccesos(0) {
+Tabla::Tabla(const string& nombre, Conj<string> claves,Registro_tp3 columnas) : _nombre(nombre), _claves(claves), _cantAccesos(0) {
     class Lista<tupString<Dato> >::const_Iterador iter = columnas.vistaDicc();
     while (iter.HaySiguiente()) {
         bool es_Nat = iter.Siguiente().significado.esNat();
@@ -87,7 +87,7 @@ Tabla& Tabla::operator=(const Tabla& t){
   _claves = t._claves;
   _campoIndexadoNat = t._campoIndexadoNat;
   _campoIndexadoString = t._campoIndexadoString;
-  Conj<Registro>::const_Iterador it = t._registros.CrearIt();
+  Conj<Registro_tp3>::const_Iterador it = t._registros.CrearIt();
   while ( it.HaySiguiente() ) {
     agregarRegistro(it.Siguiente());
     it.Avanzar();
@@ -127,7 +127,7 @@ bool Tabla::tipoCampo(const string& c) const {
     return _campos.obtener(c);
 }
 
-const Conj<Registro>& Tabla::registros() const {
+const Conj<Registro_tp3>& Tabla::registros() const {
     return _registros;
 }
 
@@ -135,7 +135,7 @@ unsigned int Tabla::cantidadDeAccesos() const {
     return _cantAccesos;
 }
 
-void Tabla::borrarRegistro(Registro cr) {
+void Tabla::borrarRegistro(Registro_tp3 cr) {
 
     class Lista<struct tupString<Dato> >::const_Iterador it = cr.vistaDicc();
     string clave = it.Siguiente().clave;
@@ -152,7 +152,7 @@ void Tabla::borrarRegistro(Registro cr) {
             iterador.Siguiente().itNat = NULL;
             _indicesNat.borrar(dato.dame_valorNat());
 
-            Registro regi = iterador.Siguiente().itReg.Siguiente();
+           Registro_tp3 regi = iterador.Siguiente().itReg.Siguiente();
             if (iterador.Siguiente().itString != NULL){
                 iterador.Siguiente().itString->EliminarSiguiente();
                 delete iterador.Siguiente().itString;
@@ -178,7 +178,7 @@ void Tabla::borrarRegistro(Registro cr) {
             iterador.Siguiente().itString = NULL;
             _indicesString.borrar(dato.dame_valorStr());
 
-            Registro regi = iterador.Siguiente().itReg.Siguiente();
+           Registro_tp3 regi = iterador.Siguiente().itReg.Siguiente();
             if (iterador.Siguiente().itNat != NULL){
                 iterador.Siguiente().itNat->EliminarSiguiente();
                 delete iterador.Siguiente().itNat;
@@ -196,7 +196,7 @@ void Tabla::borrarRegistro(Registro cr) {
         //Modificación fuerte respecto de diseño...
         Lista<IteradoresIndices>::Iterador iter = _iteradores.CrearIt();
         while (iter.HaySiguiente()) {
-            Registro regi = iter.Siguiente().itReg.Siguiente();
+           Registro_tp3 regi = iter.Siguiente().itReg.Siguiente();
             if (regi.obtener(clave) == dato) {
                 if (iter.Siguiente().itNat != NULL){
                     iter.Siguiente().itNat->EliminarSiguiente();
@@ -247,9 +247,9 @@ void Tabla::borrarRegistro(Registro cr) {
     }
 }
 
-void Tabla::agregarRegistro(Registro r) {
+void Tabla::agregarRegistro(Registro_tp3 r) {
     _cantAccesos++;
-    Conj<Registro>::Iterador iter = _registros.AgregarRapido(r);
+    Conj<Registro_tp3>::Iterador iter = _registros.AgregarRapido(r);
     IteradoresIndices ag = IteradoresIndices(iter);
     Lista<IteradoresIndices>::Iterador it = _iteradores.AgregarAtras(ag);
 
@@ -373,8 +373,8 @@ void Tabla::indexar(const string& c) {
     }
 }
 
-Lista<Registro> Tabla::buscar(const string& c, const Dato& d) const {
-    Lista<Registro> res;
+Lista<Registro_tp3> Tabla::buscar(const string& c, const Dato& d) const {
+    Lista<Registro_tp3> res;
     if (d.esNat()) {
         if (!_campoIndexadoNat.EsVacia() && _campoIndexadoNat.Primero().campo == c) {
             if (_indicesNat.def(d.dame_valorNat())) {
@@ -399,7 +399,7 @@ Lista<Registro> Tabla::buscar(const string& c, const Dato& d) const {
         }
     }
 
-    Conj<Registro>::const_Iterador it = _registros.CrearIt();
+    Conj<Registro_tp3>::const_Iterador it = _registros.CrearIt();
     while (it.HaySiguiente()) {
         if (it.Siguiente().obtener(c) == d) {
             res.AgregarAtras(it.Siguiente());
@@ -463,13 +463,13 @@ ostream& operator<<(ostream& os, const Tabla& t) {
   }
 
   os << endl << "Registros:   " << endl;
-  Conj<Registro>::const_Iterador iter = t.registros().CrearIt();
+  Conj<Registro_tp3>::const_Iterador iter = t.registros().CrearIt();
   while(iter.HaySiguiente()){
     os << "-> | ";
     Conj<string> camposReg = iter.Siguiente().claves();
     Conj<string>::const_Iterador superIt = camposReg.CrearIt();
     while(superIt.HaySiguiente()){
-        Registro reg = iter.Siguiente();
+       Registro_tp3 reg = iter.Siguiente();
         os << superIt.Siguiente() << ": " << reg.obtener(superIt.Siguiente());
         superIt.Avanzar();
         if (superIt.HaySiguiente() ) os << " | ";

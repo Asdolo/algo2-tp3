@@ -2,8 +2,7 @@
 #ifndef TP3_INCLUDED_H
 #define TP3_INCLUDED_H
 
-
-#define Registro tp3::diccString<tp3::Dato>
+#define Registro_tp3 tp3::diccString<tp3::Dato>
 #include "./tp3-base/aed2/Conj.h"
 #include "./tp3-base/aed2/Lista.h"
 #include "Pila.h"

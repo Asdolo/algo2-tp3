@@ -243,7 +243,7 @@ class Driver
 
   private:
 
-    BaseDeDatos db;
+    tp3::BaseDeDatos db;
 
 
 
