@@ -24,6 +24,8 @@ namespace testsDriver
         aed2::Driver::Registro persona = sampleReg();
 
         bd.insertarRegistro("personas", persona);
+        cout << bd.cantidadDeAccesosDeTabla("personas") << endl;
+
 
         aed2::Conj<aed2::Columna> columnas = bd.columnasDeTabla("personas");
 
@@ -45,26 +47,29 @@ namespace testsDriver
         ASSERT_EQ(claves.CrearIt().Siguiente(), "DNI");
 
         bd.borrarRegistro("personas", "DNI", aed2::Driver::Dato(1));
-
+        cout << bd.cantidadDeAccesosDeTabla("personas") << endl;
+        
         aed2::Conj<aed2::Driver::Registro> registros = bd.registrosDeTabla("personas");
 
         ASSERT(registros.EsVacio());
 
         bd.insertarRegistro("personas", persona);
+        cout << bd.cantidadDeAccesosDeTabla("personas") << endl;
+
 
         registros = bd.registrosDeTabla("personas");
 
-        ASSERT_EQ(registros.Cardinal(), 1);
+        assert(registros.Cardinal() == 1);
         ASSERT(registros.CrearIt().Siguiente().Significado("DNI") ==
                 aed2::Driver::Dato(1));
-
-        ASSERT_EQ(bd.cantidadDeAccesosDeTabla("personas"), 3);
+        cout << bd.cantidadDeAccesosDeTabla("personas") << endl;
+        assert(bd.cantidadDeAccesosDeTabla("personas") == 3);
     }
 
     void main(int, char**)
     {
         std::cout << "******** driver ********" << std::endl;
-        RUN_TEST( ejemplo_simple );
+        ejemplo_simple();
     }
 
 

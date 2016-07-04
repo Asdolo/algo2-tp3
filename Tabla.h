@@ -218,6 +218,7 @@ void Tabla::borrarRegistro(Registro_tp3 cr) {
                 }
                 iter.Siguiente().itReg.EliminarSiguiente();
                 iter.EliminarSiguiente();
+                _cantAccesos++;
             }
             else iter.Avanzar();
         }

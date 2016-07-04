@@ -1,4 +1,5 @@
 #include "Driver.h"
+#include "testsBorg.h"
 
 bool aed2::operator==(const aed2::Columna& c1, const aed2::Columna& c2) {
     return c1.nombre == c2.nombre and c1.tipo == c2.tipo;
@@ -60,8 +61,7 @@ Driver::Driver() {
 }
 
 Driver::~Driver() {
-    // TODO ...
-    assert(false);
+
 }
 
 // Tablas
@@ -98,7 +98,7 @@ void Driver::borrarRegistro(const NombreTabla& tabla, const NombreCampo& columna
     tp3::Dato dato = valor.esNat() ? tp3::Dato::datoNat(valor.dameNat()) : tp3::Dato::datoString(valor.dameString());
     tp3::diccString<tp3::Dato> crit;
     crit.definir(columna, dato);
-
+    std::cout << "Crit: " << crit << std::endl;
     db.Borrar(crit, tabla);
 }
 
@@ -321,4 +321,9 @@ aed2::Conj<Driver::Registro> Driver::vistaJoin(const NombreTabla& tabla1, const 
         it.Avanzar();
     }
     return res;
+}
+
+int main (){
+  testsDriver::main(2, NULL);
+	return 1;
 }
