@@ -2,13 +2,13 @@
 #ifndef DATO_H_INCLUDED
 #define DATO_H_INCLUDED
 
-#include "aed2.h"
+#include "tp3.h"
 #include <cassert>
 #include <string>
 #include <iostream>
 
 using namespace std;
-
+namespace tp3{
     class Dato{
 
         public:
@@ -30,8 +30,8 @@ using namespace std;
             const string& dame_valorStr() const;
 
             static bool mismoTipo(const Dato& d1,const Dato& d2);
-            static const Dato min(const Conj<Dato>& cd);
-            static const Dato max(const Conj<Dato>& cd);
+            static const Dato min(const aed2::Conj<Dato>& cd);
+            static const Dato max(const aed2::Conj<Dato>& cd);
 
         private:
             // Campos
@@ -42,6 +42,7 @@ using namespace std;
             //Constructor auxiliar
             Dato(bool es_nat, string s, unsigned int n) : nat(es_nat), valorStr(s), valorNat(n) {};
     };
+
 
     bool Dato::esNat() const{
     	return nat;
@@ -65,8 +66,8 @@ using namespace std;
       return (d1.esNat()==d2.esNat());
     };
 
-     const Dato min(const Conj<Dato>& cd){
-    	Conj<Dato>::const_Iterador it = cd.CrearIt();
+     const Dato min(const aed2::Conj<Dato>& cd){
+    	aed2::Conj<Dato>::const_Iterador it = cd.CrearIt();
     	Dato minimo = it.Siguiente();
     	while(it.HaySiguiente()){
     		if ( it.Siguiente() <= minimo ){
@@ -78,8 +79,8 @@ using namespace std;
     }
 
 
-     const Dato Dato::max(const Conj<Dato>& cd){
-      Conj<Dato>::const_Iterador it = cd.CrearIt();
+     const Dato Dato::max(const aed2::Conj<Dato>& cd){
+      aed2::Conj<Dato>::const_Iterador it = cd.CrearIt();
       Dato maximo = it.Siguiente();
       while(it.HaySiguiente()){
       	if ( it.Siguiente() > maximo ){
@@ -153,5 +154,5 @@ using namespace std;
     }
 
 
-
+}
 #endif

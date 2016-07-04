@@ -1,14 +1,15 @@
 #ifndef DICCNAT_H_INCLUDED
 #define DICCNAT_H_INCLUDED
 
-#include "aed2.h"
-#include "Dato.h"
-#include "Pila.h"
+#include "tp3.h"
 #include <cassert>
 #include <string>
 #include <iostream>
 
 using namespace std;
+using namespace aed2;
+
+namespace tp3{
 
 template<class Significado>
 struct tuplaDicc{
@@ -331,4 +332,5 @@ ostream& operator<<(ostream& os, const diccNat<Significado>& d){
   return os;
 }
 
+}
 #endif

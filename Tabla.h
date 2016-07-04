@@ -1,18 +1,16 @@
 #ifndef TABLA_H_INCLUDED
 #define TABLA_H_INCLUDED
-#include "diccString.h"
-#include "aed2.h"
+
+#include "tp3.h"
 #include <cassert>
 #include <string>
 #include <iostream>
-#include "Dato.h"
-#include "diccNat.h"
-#include "diccString.h"
 
-#define Registro diccString<Dato>
 
 using namespace std;
+using namespace aed2;
 
+namespace tp3{
 class Tabla {
 public:
 
@@ -482,4 +480,5 @@ ostream& operator<<(ostream& os, const Tabla& t) {
   return os;
 }
 
+}
 #endif

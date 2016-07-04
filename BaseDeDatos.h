@@ -3,17 +3,16 @@
 #define BASEDEDATOS_H_INCLUDED
 
 
-#include "aed2.h"
+#include "tp3.h"
 #include <cassert>
 #include <string>
 #include <iostream>
-#include "Dato.h"
-#include "diccString.h"
-#include "Tabla.h"
 
-#define Registro diccString<Dato>
 
+using namespace aed2;
 using namespace std;
+
+namespace tp3{
 
 class BaseDeDatos {
 public:
@@ -89,7 +88,7 @@ ostream& operator<<(ostream& os, const BaseDeDatos& b) {
     }
     os << endl;
     os << "----------------------------" << endl;
-    
+
 
     os << "Tabla más accedida: " << b.tablaMaxima() << endl;
     os << "----------------------------" << endl;
@@ -502,4 +501,5 @@ string BaseDeDatos::tablaMaxima() const {
     return (*_tablaMasAccedida);
 }
 
+}
 #endif
