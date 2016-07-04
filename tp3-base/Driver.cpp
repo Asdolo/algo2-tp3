@@ -203,7 +203,13 @@ aed2::Conj<Driver::Registro> Driver::buscar(const NombreTabla& tabla, const Regi
 
 aed2::Conj<NombreTabla> Driver::tablas() const
 {
-  return db.Tablas();
+    aed2::Conj<NombreTabla> res;
+  Conj<string>::const_Iterador it = db.Tablas();
+  while(it.HaySiguiente()){
+      res.AgregarRapido(it.Siguiente());
+      it.Avanzar();
+  }
+  return res;
 }
 
 NombreTabla Driver::tablaMaxima() const
@@ -248,7 +254,7 @@ bool Driver::tieneIndiceString(const NombreTabla& tabla) const
 NombreCampo Driver::campoIndiceNat(const NombreTabla& tabla) const
 {
   tp3::Tabla t = db.dameTabla(tabla);
-  Driver::NombreCampo res;
+  string res;
   Conj<string> indices = t.indices();
   Conj<string>::const_Iterador it = indices.CrearIt();
   while(it.HaySiguiente()){
@@ -264,7 +270,7 @@ NombreCampo Driver::campoIndiceNat(const NombreTabla& tabla) const
 NombreCampo Driver::campoIndiceString(const NombreTabla& tabla) const
 {
   tp3::Tabla t = db.dameTabla(tabla);
-  Driver::NombreCampo res;
+  string res;
   Conj<string> indices = t.indices();
   Conj<string>::const_Iterador it = indices.CrearIt();
   while(it.HaySiguiente()){
@@ -279,14 +285,14 @@ NombreCampo Driver::campoIndiceString(const NombreTabla& tabla) const
 
 void Driver::crearIndiceNat(const NombreTabla& tabla, const NombreCampo& campo)
 {
-  tp3::Tabla t& = db.dameTabla(tabla);
+  tp3::Tabla t = db.dameTabla(tabla);
   t.indexar(campo);
 }
 
 void Driver::crearIndiceString(const NombreTabla& tabla, const NombreCampo& campo)
 {
-  tp3::Tabla& t = db.dameTabla(tabla);
-  t.indexar(campo);
+    tp3::Tabla t = db.dameTabla(tabla);
+    t.indexar(campo);
 }
 
 // Joins
@@ -308,15 +314,24 @@ void Driver::generarVistaJoin(const NombreTabla& tabla1, const NombreTabla& tabl
 
 void Driver::borrarVistaJoin(const NombreTabla& tabla1, const NombreTabla& tabla2)
 {
-  db.borrarJoin(tabla1,tabla2);
+    db.BorrarJoin(tabla1,tabla2);
 }
 
 aed2::Conj<Driver::Registro> Driver::vistaJoin(const NombreTabla& tabla1, const NombreTabla& tabla2)/* const*/
 {
-  tp3::diccString<tp3::Dato>::const_Iterador it = db.vistaJoin(tabla1.nombre(),tabla2.nombre());
+Conj<tp3::diccString<tp3::Dato> >::const_Iterador it =db.vistaJoin(tabla1,tabla2);
   aed2::Conj<Driver::Registro> res;
   while(it.HaySiguiente()){
-    res.AgregarRapido(it.Siguiente());
+      class aed2::Lista<struct tp3::tupString<class tp3::Dato> >::const_Iterador it2 = it.Siguiente().vistaDicc();
+      while(it2.HaySiguiente()){
+          Driver::Registro r;
+          string clave = it2.Siguiente().clave;
+          tp3::Dato significado = it2.Siguiente().significado;
+          Driver::Dato sign = (significado.esNat())? Driver::Dato(significado.dame_valorNat()) : Driver::Dato(significado.dame_valorStr());
+          r.Definir(clave,sign);
+          res.AgregarRapido(r);
+          it2.Avanzar();
+      }
     it.Avanzar();
   }
   return res;
