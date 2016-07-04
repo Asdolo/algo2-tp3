@@ -47,6 +47,7 @@ public:
 
     Conj<Registro_tp3> busquedaCriterio(Registro_tp3 cr, string t) const;
 
+    diccString<diccString<Conj<Registro_tp3 > > > _registrosDelJoin;
 private:
 
     Conj<Registro_tp3> combinarRegistros(string t1, string t2, string campo) const;
@@ -67,7 +68,6 @@ private:
       Lista<tupInterna> cambiosT2;
     };
 
-    diccString<diccString<Conj<Registro_tp3 > > > _registrosDelJoin;
     string* _tablaMasAccedida;
     diccString<Tabla> _nombreATabla;
     Conj<string> _tablas;
@@ -128,7 +128,10 @@ BaseDeDatos::BaseDeDatos() :
 {}
 
 BaseDeDatos::~BaseDeDatos(){
-  if (_tablaMasAccedida != NULL) delete _tablaMasAccedida;
+  if (_tablaMasAccedida != NULL){
+    delete _tablaMasAccedida;
+    //_tablaMasAccedida = NULL;
+  }
 }
 
 void BaseDeDatos::agregarTabla(Tabla t) {
@@ -152,7 +155,8 @@ void BaseDeDatos::insertarEntrada(Registro_tp3 r, string s) {
     tabla.agregarRegistro(r);
     Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
     if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
-        _tablaMasAccedida = &s;
+        delete _tablaMasAccedida;
+        _tablaMasAccedida = new string(s);
     }
     class Lista<struct tupString<tupBdd > >::const_Iterador iter = _hayJoin.obtener(s).vistaDicc();
 
@@ -168,7 +172,7 @@ void BaseDeDatos::insertarEntrada(Registro_tp3 r, string s) {
     Conj<string>::Iterador iterTablas =_tablas.CrearIt();
     while (iterTablas.HaySiguiente()) {
         if (_hayJoin.obtener(iterTablas.Siguiente()).def(s)) {
-            tupBdd cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(s);
+            tupBdd& cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(s);
             tupInterna tup;
             tup.reg = r;
             tup.agregar = true;
@@ -182,31 +186,48 @@ void BaseDeDatos::Borrar(Registro_tp3 cr, string t) {
     assert(_nombreATabla.def(t));
 
     Tabla& tabla = _nombreATabla.obtener(t);
+
+    class Lista<struct tupString<Dato> >::const_Iterador criterio = cr.vistaDicc();
+    //std::cout << "Criterio: " << criterio.Siguiente().clave << " / " << criterio.Siguiente().significado << std::endl;
+    //std::cout << "TABLA:" << tabla << std::endl;
+    Lista<Registro_tp3> borrados = tabla.buscar(criterio.Siguiente().clave, criterio.Siguiente().significado);
+    std::cout << "Borrados            :" << borrados << std::endl;
     tabla.borrarRegistro(cr);
     Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
     if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
-        _tablaMasAccedida = &t;
+        delete _tablaMasAccedida;
+        _tablaMasAccedida = new string(t);
     }
     class Lista<struct tupString<tupBdd > >::const_Iterador iter = _hayJoin.obtener(t).vistaDicc();
     while (iter.HaySiguiente()) {
-        tupInterna tup;
-        tup.reg = cr;
-        tup.agregar = false;
-        //MOD
-        _hayJoin.obtener(t).obtener(iter.Siguiente().clave).cambiosT1.AgregarAdelante(tup);
-        //iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
-        iter.Avanzar();
+      Lista<Registro_tp3>::const_Iterador itBorrados = borrados.CrearIt();
+      while (itBorrados.HaySiguiente()){
+          tupInterna tup;
+          tup.reg = itBorrados.Siguiente();
+          tup.agregar = false;
+          //MOD
+          _hayJoin.obtener(t).obtener(iter.Siguiente().clave).cambiosT1.AgregarAtras(tup);
+          //iter.Siguiente().significado.cambiosT1.AgregarAdelante(tup);
+          itBorrados.Avanzar();
+      }
+      iter.Avanzar();
     }
     Conj<string>::Iterador iterTablas =_tablas.CrearIt();
     while (iterTablas.HaySiguiente()) {
-        if (_hayJoin.obtener(iterTablas.Siguiente()).def(t)) {
-            tupBdd cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(t);
+      if (_hayJoin.obtener(iterTablas.Siguiente()).def(t)) {
+        std::cout << "LA TABLA ES: " << iterTablas.Siguiente() << std::endl;
+      Lista<Registro_tp3>::const_Iterador itBorrados = borrados.CrearIt();
+      while (itBorrados.HaySiguiente()) {
+            std::cout << "SE AGREGA A T2: " << itBorrados.Siguiente() << std::endl;
+            tupBdd& cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(t);
             tupInterna tup;
-            tup.reg = cr;
+            tup.reg = itBorrados.Siguiente();
             tup.agregar = false;
             cambios.cambiosT2.AgregarAtras(tup);
+            itBorrados.Avanzar();
         }
-        iterTablas.Avanzar();
+      }
+      iterTablas.Avanzar();
     }
 }
 
@@ -340,7 +361,7 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
     Tabla tabla2 = _nombreATabla.obtener(s2);
 
     if ( esNat ) {
-      diccNat<Conj<Registro_tp3>::Iterador > diccDeIters = _joinPorCampoNat.obtener(s1).obtener(s2);
+      diccNat<Conj<Registro_tp3>::Iterador >& diccDeIters = _joinPorCampoNat.obtener(s1).obtener(s2);
       Lista<tupInterna>::Iterador itT1 = _hayJoin.obtener(s1).obtener(s2).cambiosT1.CrearIt();
 
       while ( itT1.HaySiguiente() ) {
@@ -353,11 +374,15 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
 
           if ( tupSiguiente.agregar ) {
             Registro_tp3 registroMergeado = Merge(tupSiguiente.reg, regT2);
+            std::cout << "Mergeado: " << registroMergeado << std::endl;
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveNat.dame_valorNat(), iter);
           } else {
-            diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
-            diccDeIters.borrar(claveNat.dame_valorNat());
+            if ( diccDeIters.def(claveNat.dame_valorNat()) ) {
+              std::cout << "BORRANDO: " << diccDeIters.def(claveNat.dame_valorNat()) << std::endl;
+              diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
+              diccDeIters.borrar(claveNat.dame_valorNat());
+            }
           }
         }
 
@@ -379,8 +404,10 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveNat.dame_valorNat(), iter);
           } else {
-            diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
-            diccDeIters.borrar(claveNat.dame_valorNat());
+            if ( diccDeIters.def(claveNat.dame_valorNat()) ) {
+              diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
+              diccDeIters.borrar(claveNat.dame_valorNat());
+            }
           }
         }
         itT2.EliminarSiguiente();
@@ -388,7 +415,7 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
 
     } else {
 
-      diccString<Conj<Registro_tp3>::Iterador > diccDeIters = _joinPorCampoString.obtener(s1).obtener(s2);
+      diccString<Conj<Registro_tp3>::Iterador >& diccDeIters = _joinPorCampoString.obtener(s1).obtener(s2);
       Lista<tupInterna>::Iterador itT1 = _hayJoin.obtener(s1).obtener(s2).cambiosT1.CrearIt();
 
       while ( itT1.HaySiguiente() ) {
@@ -404,8 +431,10 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveString.dame_valorStr(), iter);
           } else {
-            diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
-            diccDeIters.borrar(claveString.dame_valorStr());
+            if ( diccDeIters.def(claveString.dame_valorStr()) ) {
+              diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
+              diccDeIters.borrar(claveString.dame_valorStr());
+            }
           }
         }
 
@@ -427,8 +456,10 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveString.dame_valorStr(), iter);
           } else {
-            diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
-            diccDeIters.borrar(claveString.dame_valorStr());
+            if ( diccDeIters.def(claveString.dame_valorStr()) ) {
+              diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
+              diccDeIters.borrar(claveString.dame_valorStr());
+            }
           }
         }
         itT2.EliminarSiguiente();
@@ -473,7 +504,7 @@ Conj<Registro_tp3> BaseDeDatos::busquedaCriterio(Registro_tp3 crit, string t) co
     if (!termine) {
         Conj<Registro_tp3>::const_Iterador itRegs =  tabla.registros().CrearIt();
         while (itRegs.HaySiguiente()) {
-            if (coincidenTodosCrit(itRegs.Siguiente(),crit)){
+            if (coincidenTodosCrit(crit, itRegs.Siguiente())){
                 res.AgregarRapido(itRegs.Siguiente());
 
             }
@@ -485,12 +516,12 @@ Conj<Registro_tp3> BaseDeDatos::busquedaCriterio(Registro_tp3 crit, string t) co
 }
 
 bool BaseDeDatos::coincidenTodosCrit(Registro_tp3 crit, Registro_tp3 r) {
-    class Lista<struct tupString<Dato> >::const_Iterador itCrit =crit.vistaDicc();
+    class Lista<struct tupString<Dato> >::const_Iterador itCrit = crit.vistaDicc();
     bool res = true;
     while(itCrit.HaySiguiente() && res){
         tupString<Dato> tuplaCrit = itCrit.Siguiente();
         if( r.obtener(tuplaCrit.clave) != tuplaCrit.significado){
-            res=false;
+            res = false;
         }
         itCrit.Avanzar();
     }

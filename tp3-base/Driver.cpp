@@ -1,5 +1,10 @@
 #include "Driver.h"
-#include "testsBorg.h"
+#include "testsDB.h"
+#include "testsDato.h"
+//#include "testsDiccLog.h"
+//#include "testsDiccTrie.h"
+//#include "testsDriver.h"
+#include "testsTabla.h"
 
 bool aed2::operator==(const aed2::Columna& c1, const aed2::Columna& c2) {
     return c1.nombre == c2.nombre and c1.tipo == c2.tipo;
@@ -323,7 +328,9 @@ aed2::Conj<Driver::Registro> Driver::vistaJoin(const NombreTabla& tabla1, const 
     return res;
 }
 
+//TESTS
+
 int main (){
-  testsDriver::main(2, NULL);
+  testsDB::main(2, NULL);
 	return 1;
 }
