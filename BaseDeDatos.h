@@ -191,7 +191,6 @@ void BaseDeDatos::Borrar(Registro_tp3 cr, string t) {
     //std::cout << "Criterio: " << criterio.Siguiente().clave << " / " << criterio.Siguiente().significado << std::endl;
     //std::cout << "TABLA:" << tabla << std::endl;
     Lista<Registro_tp3> borrados = tabla.buscar(criterio.Siguiente().clave, criterio.Siguiente().significado);
-    std::cout << "Borrados            :" << borrados << std::endl;
     tabla.borrarRegistro(cr);
     Tabla tabMax = _nombreATabla.obtener(*_tablaMasAccedida);
     if (tabla.cantidadDeAccesos() > tabMax.cantidadDeAccesos()) {
@@ -215,10 +214,8 @@ void BaseDeDatos::Borrar(Registro_tp3 cr, string t) {
     Conj<string>::Iterador iterTablas =_tablas.CrearIt();
     while (iterTablas.HaySiguiente()) {
       if (_hayJoin.obtener(iterTablas.Siguiente()).def(t)) {
-        std::cout << "LA TABLA ES: " << iterTablas.Siguiente() << std::endl;
       Lista<Registro_tp3>::const_Iterador itBorrados = borrados.CrearIt();
       while (itBorrados.HaySiguiente()) {
-            std::cout << "SE AGREGA A T2: " << itBorrados.Siguiente() << std::endl;
             tupBdd& cambios = _hayJoin.obtener(iterTablas.Siguiente()).obtener(t);
             tupInterna tup;
             tup.reg = itBorrados.Siguiente();
@@ -356,9 +353,9 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
     assert( hayJoin(s1,s2) );
 
     string campito = _hayJoin.obtener(s1).obtener(s2).campoJoin;
-    Tabla tabla1 = _nombreATabla.obtener(s1);
+    Tabla& tabla1 = _nombreATabla.obtener(s1);
     bool esNat = tabla1.tipoCampo(campito);
-    Tabla tabla2 = _nombreATabla.obtener(s2);
+    Tabla& tabla2 = _nombreATabla.obtener(s2);
 
     if ( esNat ) {
       diccNat<Conj<Registro_tp3>::Iterador >& diccDeIters = _joinPorCampoNat.obtener(s1).obtener(s2);
@@ -369,23 +366,17 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
         Dato claveNat = tupSiguiente.reg.obtener(campito);
         Lista<Registro_tp3> coincidencias = tabla2.buscar(campito, claveNat);
 
-        if ( !coincidencias.EsVacia() ) {
-          Registro_tp3 regT2 = coincidencias.Primero();
-
-          if ( tupSiguiente.agregar ) {
+          if ( tupSiguiente.agregar && !coincidencias.EsVacia() ) {
+            Registro_tp3 regT2 = coincidencias.Primero();
             Registro_tp3 registroMergeado = Merge(tupSiguiente.reg, regT2);
-            std::cout << "Mergeado: " << registroMergeado << std::endl;
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveNat.dame_valorNat(), iter);
           } else {
             if ( diccDeIters.def(claveNat.dame_valorNat()) ) {
-              std::cout << "BORRANDO: " << diccDeIters.def(claveNat.dame_valorNat()) << std::endl;
               diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
               diccDeIters.borrar(claveNat.dame_valorNat());
             }
           }
-        }
-
         itT1.EliminarSiguiente();
       }
 
@@ -396,20 +387,17 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
         Dato claveNat = tupSiguiente.reg.obtener(campito);
         Lista<Registro_tp3> coincidencias = tabla1.buscar(campito, claveNat);
 
-        if ( !coincidencias.EsVacia() && !diccDeIters.def(claveNat.dame_valorNat()) ) {
-          Registro_tp3 regT1 = coincidencias.Primero();
-
-          if ( tupSiguiente.agregar ) {
+          if ( tupSiguiente.agregar &&  !coincidencias.EsVacia() && !diccDeIters.def(claveNat.dame_valorNat()) ) {
+            Registro_tp3 regT1 = coincidencias.Primero();
             Registro_tp3 registroMergeado = Merge(regT1, tupSiguiente.reg);
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveNat.dame_valorNat(), iter);
           } else {
-            if ( diccDeIters.def(claveNat.dame_valorNat()) ) {
+            if ( !tupSiguiente.agregar && diccDeIters.def(claveNat.dame_valorNat()) ) {
               diccDeIters.obtener(claveNat.dame_valorNat()).EliminarSiguiente();
               diccDeIters.borrar(claveNat.dame_valorNat());
             }
           }
-        }
         itT2.EliminarSiguiente();
       }
 
@@ -423,10 +411,8 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
         Dato claveString = tupSiguiente.reg.obtener(campito);
         Lista<Registro_tp3> coincidencias = tabla2.buscar(campito, claveString);
 
-        if ( !coincidencias.EsVacia() ) {
-          Registro_tp3 regT2 = coincidencias.Primero();
-
-          if ( tupSiguiente.agregar ) {
+          if ( tupSiguiente.agregar && !coincidencias.EsVacia() ) {
+            Registro_tp3 regT2 = coincidencias.Primero();
             Registro_tp3 registroMergeado = Merge(tupSiguiente.reg, regT2);
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveString.dame_valorStr(), iter);
@@ -436,10 +422,10 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
               diccDeIters.borrar(claveString.dame_valorStr());
             }
           }
+          itT1.EliminarSiguiente();
         }
 
-        itT1.EliminarSiguiente();
-      }
+
 
       Lista<tupInterna>::Iterador itT2 = _hayJoin.obtener(s1).obtener(s2).cambiosT2.CrearIt();
 
@@ -448,22 +434,20 @@ Conj<Registro_tp3>::const_Iterador BaseDeDatos::vistaJoin(string s1, string s2) 
         Dato claveString = tupSiguiente.reg.obtener(campito);
         Lista<Registro_tp3> coincidencias = tabla1.buscar(campito, claveString);
 
-        if ( !coincidencias.EsVacia() && !diccDeIters.def(claveString.dame_valorStr()) ) {
-          Registro_tp3 regT1 = coincidencias.Primero();
-
-          if ( tupSiguiente.agregar ) {
+          if ( tupSiguiente.agregar && !coincidencias.EsVacia() && !diccDeIters.def(claveString.dame_valorStr()) ) {
+            Registro_tp3 regT1 = coincidencias.Primero();
             Registro_tp3 registroMergeado = Merge(regT1, tupSiguiente.reg);
             Conj<Registro_tp3>::Iterador iter = _registrosDelJoin.obtener(s1).obtener(s2).AgregarRapido(registroMergeado);
             diccDeIters.definir(claveString.dame_valorStr(), iter);
           } else {
-            if ( diccDeIters.def(claveString.dame_valorStr()) ) {
+            if ( !tupSiguiente.agregar && diccDeIters.def(claveString.dame_valorStr()) ) {
               diccDeIters.obtener(claveString.dame_valorStr()).EliminarSiguiente();
               diccDeIters.borrar(claveString.dame_valorStr());
             }
           }
+          itT2.EliminarSiguiente();
         }
-        itT2.EliminarSiguiente();
-      }
+
     }
     Conj<Registro_tp3>::const_Iterador res = _registrosDelJoin.obtener(s1).obtener(s2).CrearIt();
     return res;

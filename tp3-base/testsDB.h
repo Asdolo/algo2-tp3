@@ -236,18 +236,14 @@ namespace testsDB
         //std::cout << "t1->t0 :" << db._registrosDelJoin.obtener("tabla1").obtener("tabla0") << std::endl;
 
         Registro_tp3 pablo2;
-        //pablo2.definir("claveNat0", tp3::Dato::datoNat(0));
-        pablo2.definir("claveStr0", tp3::Dato::datoString("b"));
+        pablo2.definir("claveNat0", tp3::Dato::datoNat(0));
+        //pablo2.definir("claveStr0", tp3::Dato::datoString("b"));
         db.Borrar(pablo2, "tabla0");
 
 
         it1 = db.vistaJoin("tabla1","tabla0");
         it0 = db.vistaJoin("tabla0","tabla1");
 
-        std::cout << "TABLA1: " << db.dameTabla("tabla1").registros() << std::endl;
-        std::cout << "TABLA0: " << db.dameTabla("tabla0").registros() << std::endl;
-        std::cout << "t0->t1 :" << db._registrosDelJoin.obtener("tabla0").obtener("tabla1") << std::endl;
-        std::cout << "t1->t0 :" << db._registrosDelJoin.obtener("tabla1").obtener("tabla0") << std::endl;
 
         pablo2.borrar("claveNat0");
         pablo2.definir("claveStr0", tp3::Dato::datoString("b"));
@@ -256,7 +252,6 @@ namespace testsDB
 
         db.insertarEntrada(sampleReg0_3(), "tabla0");
         db.insertarEntrada(sampleReg1_3(), "tabla1");
-
 
         //std::cout << "t0->t1 :" << db._registrosDelJoin.obtener("tabla0").obtener("tabla1") << std::endl;
         //std::cout << "t1->t0 :" << db._registrosDelJoin.obtener("tabla1").obtener("tabla0") << std::endl;
