@@ -27,8 +27,6 @@ public:
 
     void Borrar(Registro_tp3 cr, string t);
 
-    Conj<Registro_tp3> combinarRegistros(string t1, string t2, string campo) const;
-
     Conj<Registro_tp3>::const_Iterador generarVistaJoin(string t1, string t2, string campo);
 
     void BorrarJoin(string t1, string t2);
@@ -47,13 +45,16 @@ public:
 
     friend ostream& operator<<(ostream& os, const BaseDeDatos& b);
 
+    Conj<Registro_tp3> busquedaCriterio(Registro_tp3 cr, string t) const;
+
 private:
+
+    Conj<Registro_tp3> combinarRegistros(string t1, string t2, string campo) const;
 
     static Registro_tp3 Merge(Registro_tp3 r1, Registro_tp3 r2);
 
     static bool coincidenTodosCrit(Registro_tp3 crit, Registro_tp3 r);
 
-    Conj<Registro_tp3> busquedaCriterio(Registro_tp3 cr, string t) const;
 
     struct tupInterna {
       Registro_tp3 reg;
