@@ -1,7 +1,8 @@
 #ifndef PILA_H_INCLUDED
 #define PILA_H_INCLUDED
 
-#include "tp3.h"
+#include "Conj.h"
+#include "Lista.h"
 #include <cassert>
 #include <iostream>
 
