@@ -1,10 +1,4 @@
 #include "Driver.h"
-#include "testsDB.h"
-#include "testsDato.h"
-//#include "testsDiccLog.h"
-//#include "testsDiccTrie.h"
-//#include "testsDriver.h"
-#include "testsTabla.h"
 
 bool aed2::operator==(const aed2::Columna& c1, const aed2::Columna& c2) {
     return c1.nombre == c2.nombre and c1.tipo == c2.tipo;
@@ -89,8 +83,8 @@ void Driver::insertarRegistro(const NombreTabla& tabla, const Registro& registro
     Registro_tp3 reg;
     aed2::Dicc<NombreCampo, Dato>::const_Iterador it = registro.CrearIt();
     while (it.HaySiguiente()) {
-        tp3::Dato dato = it.SiguienteSignificado().esNat() ? tp3::Dato::datoNat(it.SiguienteSignificado().dameNat()) :
-                tp3::Dato::datoString(it.SiguienteSignificado().dameString());
+        tp3::Dato dato = it.SiguienteSignificado().esNat() ?  tp3::Dato::datoNat(it.SiguienteSignificado().dameNat()) :
+                                                              tp3::Dato::datoString(it.SiguienteSignificado().dameString());
         reg.definir(it.SiguienteClave(), dato);
         it.Avanzar();
     }
@@ -103,7 +97,7 @@ void Driver::borrarRegistro(const NombreTabla& tabla, const NombreCampo& columna
     tp3::Dato dato = valor.esNat() ? tp3::Dato::datoNat(valor.dameNat()) : tp3::Dato::datoString(valor.dameString());
     tp3::diccString<tp3::Dato> crit;
     crit.definir(columna, dato);
-    std::cout << "Crit: " << crit << std::endl;
+    //std::cout << "Crit: " << crit << std::endl;
     db.Borrar(crit, tabla);
 }
 
@@ -114,7 +108,9 @@ aed2::Conj<Columna> Driver::columnasDeTabla(const NombreTabla& tabla) const {
     aed2::Conj<string>::const_Iterador it = campos.CrearIt();
     aed2::Conj<Columna> res;
     while (it.HaySiguiente()) {
-        aed2::Columna actual = {it.Siguiente(), t.tipoCampo(it.Siguiente()) ? NAT : STR};
+        aed2::Columna actual;
+        actual.nombre = it.Siguiente();
+        actual.tipo = t.tipoCampo(it.Siguiente()) ? NAT : STR;
         res.AgregarRapido(actual);
         it.Avanzar();
     }
@@ -184,26 +180,24 @@ aed2::Conj<Driver::Registro> Driver::buscar(const NombreTabla& tabla, const Regi
     aed2::Conj<Driver::Registro> res;
     Registro_tp3 reg;
     aed2::Dicc<NombreCampo, Dato>::const_Iterador it = criterio.CrearIt();
-    while (it.HaySiguiente()) {
-        tp3::Dato dato = it.SiguienteSignificado().esNat() ? tp3::Dato::datoNat(it.SiguienteSignificado().dameNat()) :
-                tp3::Dato::datoString(it.SiguienteSignificado().dameString());
-        reg.definir(it.SiguienteClave(), dato);
-        it.Avanzar();
-    }
+    tp3::Dato dato = it.SiguienteSignificado().esNat() ?
+      tp3::Dato::datoNat(it.SiguienteSignificado().dameNat()) :
+      tp3::Dato::datoString(it.SiguienteSignificado().dameString());
+
+    reg.definir(it.SiguienteClave(), dato);
     aed2::Conj<tp3::diccString< tp3::Dato> > cj = db.busquedaCriterio(reg, tabla);
     aed2::Conj<tp3::diccString< tp3::Dato> >::Iterador itS = cj.CrearIt();
     while (itS.HaySiguiente()) {
         Driver::Registro r;
         class aed2::Lista<struct tp3::tupString<class tp3::Dato> >::const_Iterador it2 = itS.Siguiente().vistaDicc();
         while (it2.HaySiguiente()) {
-            Driver::Registro r;
             string clave = it2.Siguiente().clave;
             tp3::Dato significado = it2.Siguiente().significado;
             Driver::Dato sign = (significado.esNat()) ? Driver::Dato(significado.dame_valorNat()) : Driver::Dato(significado.dame_valorStr());
             r.Definir(clave, sign);
-            res.AgregarRapido(r);
             it2.Avanzar();
         }
+        res.AgregarRapido(r);
         itS.Avanzar();
     }
     return res;
@@ -282,19 +276,19 @@ NombreCampo Driver::campoIndiceString(const NombreTabla& tabla) const {
 }
 
 void Driver::crearIndiceNat(const NombreTabla& tabla, const NombreCampo& campo) {
-    tp3::Tabla t = db.dameTabla(tabla);
+    tp3::Tabla & t = db.dameTabla(tabla);
     t.indexar(campo);
 }
 
 void Driver::crearIndiceString(const NombreTabla& tabla, const NombreCampo& campo) {
-    tp3::Tabla t = db.dameTabla(tabla);
+    tp3::Tabla & t = db.dameTabla(tabla);
     t.indexar(campo);
 }
 
 // Joins
 
 bool Driver::hayJoin(const NombreTabla& tabla1, const NombreTabla& tabla2) const {
-    db.hayJoin(tabla1, tabla2);
+    return db.hayJoin(tabla1, tabla2);
 }
 
 NombreCampo Driver::campoJoin(const NombreTabla& tabla1, const NombreTabla& tabla2) const {
@@ -313,24 +307,17 @@ aed2::Conj<Driver::Registro> Driver::vistaJoin(const NombreTabla& tabla1, const 
     Conj<tp3::diccString<tp3::Dato> >::const_Iterador it = db.vistaJoin(tabla1, tabla2);
     aed2::Conj<Driver::Registro> res;
     while (it.HaySiguiente()) {
+        Driver::Registro r;
         class aed2::Lista<struct tp3::tupString<class tp3::Dato> >::const_Iterador it2 = it.Siguiente().vistaDicc();
         while (it2.HaySiguiente()) {
-            Driver::Registro r;
             string clave = it2.Siguiente().clave;
             tp3::Dato significado = it2.Siguiente().significado;
             Driver::Dato sign = (significado.esNat()) ? Driver::Dato(significado.dame_valorNat()) : Driver::Dato(significado.dame_valorStr());
             r.Definir(clave, sign);
-            res.AgregarRapido(r);
             it2.Avanzar();
         }
+        res.AgregarRapido(r);
         it.Avanzar();
     }
     return res;
-}
-
-//TESTS
-
-int main (){
-  testsDB::main(2, NULL);
-	return 1;
 }

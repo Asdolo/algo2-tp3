@@ -2,9 +2,9 @@
 #define DRIVER_H_
 
 #include "Tipos.h"
-#include "aed2/Conj.h"
-#include "aed2/TiposBasicos.h"
-#include "../tp3.h"
+#include "Conj.h"
+#include "TiposBasicos.h"
+#include "BaseDeDatos.h"
 
 namespace aed2
 {
@@ -245,33 +245,6 @@ class Driver
 
     tp3::BaseDeDatos db;
 
-
-
-    /*
-  private:
-
-          /**************
-           * Estructuras de nuestro tp
-           ************
-
-          tp3::DB db;
-
-          /**************
-           * Funciones auxiliares
-           ************
-
-          tp3::Registro colsToRegistro(const aed2::Conj<Columna>&) const;
-          aed2::Conj<Columna> registroToCols(const tp3::Registro&) const;
-
-          aed2::Conj<Driver::Registro> itRegsConstToRegistros(tp3::itRegistrosConst) const;
-          aed2::Conj<Driver::Registro> regsTp3ToRegistros(const aed2::Conj<tp3::Registro>&) const;
-
-          Driver::Registro registroTp3ToRegistro(const tp3::Registro&) const;
-          tp3::Registro registroToRegistroTp3(const Driver::Registro&) const;
-
-          Driver::Dato datoTp3ToDato(const tp3::Dato&) const;
-          tp3::Dato datoToDatoTp3(const Driver::Dato&) const;
-    */
 
     /************************************************************************
      * TODO: Va a ser necesario instanciar privadamente el Modulo principal *
