@@ -1,7 +1,8 @@
 #ifndef DICCSTRING_H_INCLUDED
 #define DICCSTRING_H_INCLUDED
 
-#include "tp3.h"
+#include "Conj.h"
+#include "Lista.h"
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -91,7 +92,6 @@ diccString<Significado>::diccString(){
 template<class Significado>
 diccString<Significado>::~diccString(){
   string minimo;
-  int i = 0;
   while ( nodoTrie.cantHijos > 0 ){
     //std::cout << "Hijos: " << nodoTrie.cantHijos << std::endl;
     minimo = min();
@@ -107,13 +107,12 @@ void diccString<Significado>::definir(const string& clave, const Significado& si
     tupString<Significado> entrada = tupString<Significado>(clave, significado);
     class Lista<tupString<Significado> >::Iterador it = valores.AgregarAdelante(entrada);
     Trie* actual = &(this->nodoTrie);
-
-    for (int i = 0; i < clave.length(); i++) {
-        if ((actual->hijos)[clave[i]] == NULL) {
-          (actual->hijos)[clave[i]] = new Trie();
+    for (unsigned int i = 0; (unsigned int) i < clave.length(); i++) {
+       if ((actual->hijos)[(unsigned char) clave[i]] == NULL) {
+          (actual->hijos)[(unsigned char) clave[i]] = new Trie();
         }
         actual->cantHijos++;
-        actual = (actual->hijos)[clave[i]];
+        actual = (actual->hijos)[(unsigned char) clave[i]];
     }
     class Lista<tupString<Significado> >::Iterador* it_ptr = new class Lista<tupString<Significado> >::Iterador(it);
     actual->valor = it_ptr;
@@ -123,14 +122,14 @@ template<class Significado>
 bool diccString<Significado>::def(const string& clave) const {
     const Trie* actual = &(this->nodoTrie);
     bool res = true;
-    int i = 0;
+    unsigned int i = 0;
 
     while (i < clave.length() && res) {
         if (actual->cantHijos > 0) {
-            if (actual->hijos[clave[i]] == NULL) {
+            if (actual->hijos[(unsigned char) clave[i]] == NULL) {
                 res = false;
             } else {
-                actual = (actual->hijos[clave[i]]);
+                actual = (actual->hijos[(unsigned char) clave[i]]);
             }
             i++;
         } else {
@@ -147,8 +146,8 @@ Significado& diccString<Significado>::obtener(const string& clave) const {
     assert(def(clave) && clave.length() > 0);
 
     const Trie* actual = &(this->nodoTrie);
-    for (int i = 0; i < clave.length(); i++) {
-        actual = (actual->hijos)[clave[i]];
+    for (unsigned int i = 0; i < clave.length(); i++) {
+        actual = (actual->hijos)[(unsigned char) clave[i]];
     }
     Significado& res = actual->valor->Siguiente().significado;
     return res;
@@ -170,11 +169,11 @@ void diccString<Significado>::borrar(string clave) {
     assert(def(clave) && clave.length() > 0);
 
     Trie* actual = &(this->nodoTrie);
-    Trie* temp = actual->hijos[clave[0]];
+    Trie* temp = actual->hijos[(unsigned char) clave[0]];
     actual->cantHijos--;
 
     bool borrar = false;
-    for (int i = 0; i < clave.length(); i++) {
+    for (unsigned int i = 0; i < clave.length(); i++) {
         if (i + 1 != clave.length() ){
          temp->cantHijos--;
         }
@@ -184,13 +183,14 @@ void diccString<Significado>::borrar(string clave) {
           temp->valor = NULL;
         }
         if ( !borrar && temp->cantHijos == 0 && temp->valor == NULL) {
-          actual->hijos[clave[i]] = NULL;
+          actual->hijos[(unsigned char) clave[i]] = NULL;
           borrar = true;
         }
         actual = temp;
-        temp = actual->hijos[clave[i+1]];
+        temp = actual->hijos[(unsigned char) clave[i+1]];
         if ( borrar ){
           delete actual;
+          actual = NULL;
         }
     }
 }
@@ -258,6 +258,7 @@ diccString<Significado>& diccString<Significado>::operator=(const diccString<Sig
         definir(it.Siguiente().clave, it.Siguiente().significado);
         it.Avanzar();
     }
+    return *this;
 }
 
 template<class Significado>

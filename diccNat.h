@@ -1,7 +1,9 @@
 #ifndef DICCNAT_H_INCLUDED
 #define DICCNAT_H_INCLUDED
 
-#include "tp3.h"
+#include "Conj.h"
+#include "Lista.h"
+#include "Pila.h"
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -26,7 +28,6 @@ class diccNat{
       template<class S>
       friend ostream& operator<<(ostream& os, const diccNat<S>& d);
 
-      //DEFINE CON REFERENCIA EN SIGNIFICADO, NO SE PUEDE DEFINIR USANDO CONSTANTES NI VARIABLES LOCALES (PASAN A SER BASURA CUANDO TERMINA EL SCOPE)
       void definir(const unsigned int clave, const Significado& significado);
       bool def(const unsigned int clave) const;
       Significado& obtener(const unsigned int clave) const;
@@ -195,7 +196,9 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 		}
     //std::cout << "Valor posta:" << diccAux->clave << std::endl;
     delete diccAux->significado;
+    diccAux->significado = NULL;
     delete diccAux;
+    diccAux = NULL;
 	} else if (diccAux->izq == NULL && diccAux->der != NULL) {
     //std::cout << "Caso hijo der" << std::endl;
     if (estr == diccAux){
@@ -207,7 +210,9 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 		}
     //std::cout << "Valor posta:" << diccAux->clave << std::endl;
     delete diccAux->significado;
+    diccAux->significado = NULL;
     delete diccAux;
+    diccAux = NULL;
 	} else if (diccAux->izq != NULL && diccAux->der == NULL) {
     //std::cout << "Caso hijo izq" << std::endl;
     if (estr == diccAux){
@@ -219,7 +224,9 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 		}
     //std::cout << "Valor posta:" << diccAux->clave << std::endl;
     delete diccAux->significado;
+    diccAux->significado = NULL;
     delete diccAux;
+    diccAux = NULL;
 	} else if (diccAux->izq != NULL && diccAux->der != NULL) {
     //std::cout << "Caso dos hijos" << std::endl;
     diccNat<Significado> dicc;         // Por discrepancias diseño/c++...
