@@ -19,48 +19,78 @@ struct tuplaDicc{
   Significado significado;
 };
 
+//Diccionario(Nat, Significado) implementado en ABB, iterador DFS
+
 template<class Significado>
 class diccNat{
+
     public:
+
       class Iterador;
+
       diccNat();
+
       ~diccNat();
+
       template<class S>
+
       friend ostream& operator<<(ostream& os, const diccNat<S>& d);
 
+
       void definir(const unsigned int clave, const Significado& significado);
+
       bool def(const unsigned int clave) const;
+
       Significado& obtener(const unsigned int clave) const;
+
       void borrar(const unsigned int clave);
+
       tuplaDicc<Significado> min() const;
+
       tuplaDicc<Significado> max() const;
+
       Iterador crearIt() const;
 
       class Iterador{
+
         public:
+
           Lista<tuplaDicc<Significado> > siguientes() const;
+
           void avanzar();
+
           bool hayMas() const;
+
           tuplaDicc<Significado> actual() const;
 
         private:
+
           Pila<class diccNat<Significado>::nodoDiccNat*> iter_;
 
           Iterador();
+
           Iterador(const diccNat<Significado>* dicc);
+
           friend class diccNat<Significado>::Iterador diccNat<Significado>::crearIt() const;
       };
 
     private:
+
       struct nodoDiccNat{
+
         nodoDiccNat(unsigned int k, Significado* s)
-        : clave(k), significado(s), izq(NULL), der(NULL) {};
+            : clave(k), significado(s), izq(NULL), der(NULL) {};
 
         unsigned int clave;
+
         Significado* significado;
+
         nodoDiccNat* izq;
+
         nodoDiccNat* der;
+
       };
+
       nodoDiccNat* estr;
 };
 
@@ -165,12 +195,11 @@ void diccNat<Significado>::borrar(const unsigned int clave){
   assert(def(clave));
 
 
-  //std::cout << "Borrando..." << std::endl;
 	nodoDiccNat* diccAux = estr;
 	bool termine = false;
 	nodoDiccNat* padre = NULL;
 	while (!termine) {
-		if (clave < diccAux->clave) { //ACÁ FLASHEAMOS EN EL DISEÑO
+		if (clave < diccAux->clave) {
 			padre = diccAux;
 			diccAux = diccAux->izq;
 		} else {
@@ -182,11 +211,9 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 			}
 		}
 	}
-  //std::cout << "Clave borrada: " << clave << std::endl;
 
   //SE AGREGARON LOS CASOS HEAD
-	if (diccAux->izq == NULL && diccAux->der == NULL) {
-    //std::cout << "Hoja" << std::endl;
+	if (diccAux->izq == NULL && diccAux->der == NULL) {                           // HOJA/HEAD
     if (estr == diccAux){
       estr = NULL;
     } else if (padre->izq == diccAux) {
@@ -194,13 +221,11 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 		} else {
 			padre->der = NULL;
 		}
-    //std::cout << "Valor posta:" << diccAux->clave << std::endl;
     delete diccAux->significado;
     diccAux->significado = NULL;
     delete diccAux;
     diccAux = NULL;
-	} else if (diccAux->izq == NULL && diccAux->der != NULL) {
-    //std::cout << "Caso hijo der" << std::endl;
+	} else if (diccAux->izq == NULL && diccAux->der != NULL) {                    // HIJO UNICO IZQ
     if (estr == diccAux){
       estr = diccAux->der;
     } else if (padre->izq == diccAux) {
@@ -208,13 +233,11 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 		} else {
 			padre->der = diccAux->der;
 		}
-    //std::cout << "Valor posta:" << diccAux->clave << std::endl;
     delete diccAux->significado;
     diccAux->significado = NULL;
     delete diccAux;
     diccAux = NULL;
-	} else if (diccAux->izq != NULL && diccAux->der == NULL) {
-    //std::cout << "Caso hijo izq" << std::endl;
+	} else if (diccAux->izq != NULL && diccAux->der == NULL) {                    // HIJO UNICO DER
     if (estr == diccAux){
       estr = diccAux->izq;
     } else if (padre->izq == diccAux) {
@@ -222,17 +245,15 @@ void diccNat<Significado>::borrar(const unsigned int clave){
 		} else {
 			padre->der = diccAux->izq;
 		}
-    //std::cout << "Valor posta:" << diccAux->clave << std::endl;
     delete diccAux->significado;
     diccAux->significado = NULL;
     delete diccAux;
     diccAux = NULL;
-	} else if (diccAux->izq != NULL && diccAux->der != NULL) {
-    //std::cout << "Caso dos hijos" << std::endl;
+	} else if (diccAux->izq != NULL && diccAux->der != NULL) {                    // DOS HIJOS
     diccNat<Significado> dicc;         // Por discrepancias diseño/c++...
     dicc.estr = diccAux->der;
 		tuplaDicc<Significado> temp = dicc.min();
-		borrar(temp.clave);
+		borrar(temp.clave);               // Por ser el mínimo, cae en caso hoja o hijo único derecho (no hace recursión)
 		diccAux->clave = temp.clave;
 		diccAux->significado = &(temp.significado);
 	}
@@ -271,6 +292,8 @@ class diccNat<Significado>::Iterador diccNat<Significado>::crearIt() const{
   return Iterador(this);
 }
 
+//  Apilamos por DFS punteros a nodos del diccionario (ver invRep del diseño)
+
 template<class Significado>
 Lista<tuplaDicc<Significado> > diccNat<Significado>::Iterador::siguientes() const{
   Lista<tuplaDicc<Significado> > res;
@@ -285,7 +308,7 @@ Lista<tuplaDicc<Significado> > diccNat<Significado>::Iterador::siguientes() cons
       it.iter_.apilar(prox->der);
     }
     if (prox->izq != NULL) {
-      it.iter_.apilar(prox->der);
+      it.iter_.apilar(prox->izq);
     }
   }
   return res;

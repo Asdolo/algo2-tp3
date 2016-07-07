@@ -10,16 +10,22 @@ using namespace std;
 
 namespace tp3
 {
+
+//Pila minimal implementada sobre módulo Lista (enlazada)
+// (FIFO)
+
+
 template<typename T>
 class Pila {
   public:
     Pila();
     Pila(const tp3::Pila<T>& otra);
-    //~Pila();
     tp3::Pila<T>& operator=(const tp3::Pila<T>& otra);
 
     void apilar(const T& elem);
+
     T desapilar();
+
     const T& tope() const;
 
     bool esVacia() const;
@@ -39,13 +45,6 @@ tp3::Pila<T>::Pila() : estr(aed2::Lista<T>()) {};
 
 template<typename T>
 tp3::Pila<T>::Pila(const tp3::Pila<T>& otra) : estr(otra.estr) {}
-
-//template<typename T>
-//Pila<T>::~Pila(){
-//  while (!esVacia()){
-//    desapilar();
-//  }
-//}
 
 template<typename T>
 tp3::Pila<T>& tp3::Pila<T>::operator=(const tp3::Pila<T>& otra){

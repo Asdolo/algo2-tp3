@@ -32,7 +32,7 @@ public:
 
     Conj<string>::const_Iterador Tablas() const;
 
-    Tabla& dameTabla(string t) const; //TODO(march): Por referencia
+    Tabla& dameTabla(string t) const;
 
     bool hayJoin(string t1, string t2) const;
 
@@ -62,17 +62,24 @@ private:
 
     struct tupBdd {
       string campoJoin;
-      Lista<tupInterna> cambiosT1;
-      Lista<tupInterna> cambiosT2;
+      Lista<tupInterna> cambiosT1;  //Buffer con cambios realizados en T1 desde que se llamó a generarVistaJoin/vistaJoin por última vez
+      Lista<tupInterna> cambiosT2;  //Idem para T2
     };
 
     string* _tablaMasAccedida;
+
     diccString<Tabla> _nombreATabla;
+
     Conj<string> _tablas;
+
     diccString<diccString<diccNat<Conj<Registro_tp3>::Iterador > > > _joinPorCampoNat;
     diccString<diccString<diccString<Conj<Registro_tp3>::Iterador > > > _joinPorCampoString;
+    // Se accede por (Tabla 1 -> Tabla 2 -> Diccionario indexado sobre el campo del join) a iteradores sobre _registrosDelJoin
+
     diccString<diccString<tupBdd > > _hayJoin;
+
     diccString<diccString<Conj<Registro_tp3 > > > _registrosDelJoin;
+    // Conjunto de registros del join T1 -> T2
 
 };
 

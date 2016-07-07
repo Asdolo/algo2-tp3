@@ -97,7 +97,6 @@ void Driver::borrarRegistro(const NombreTabla& tabla, const NombreCampo& columna
     tp3::Dato dato = valor.esNat() ? tp3::Dato::datoNat(valor.dameNat()) : tp3::Dato::datoString(valor.dameString());
     tp3::diccString<tp3::Dato> crit;
     crit.definir(columna, dato);
-    //std::cout << "Crit: " << crit << std::endl;
     db.Borrar(crit, tabla);
 }
 
@@ -180,11 +179,16 @@ aed2::Conj<Driver::Registro> Driver::buscar(const NombreTabla& tabla, const Regi
     aed2::Conj<Driver::Registro> res;
     Registro_tp3 reg;
     aed2::Dicc<NombreCampo, Dato>::const_Iterador it = criterio.CrearIt();
-    tp3::Dato dato = it.SiguienteSignificado().esNat() ?
-      tp3::Dato::datoNat(it.SiguienteSignificado().dameNat()) :
-      tp3::Dato::datoString(it.SiguienteSignificado().dameString());
 
-    reg.definir(it.SiguienteClave(), dato);
+    while (it.HaySiguiente() ) {
+      tp3::Dato dato = it.SiguienteSignificado().esNat() ?
+        tp3::Dato::datoNat(it.SiguienteSignificado().dameNat()) :
+        tp3::Dato::datoString(it.SiguienteSignificado().dameString());
+
+      reg.definir(it.SiguienteClave(), dato);
+      it.Avanzar();
+    }
+
     aed2::Conj<tp3::diccString< tp3::Dato> > cj = db.busquedaCriterio(reg, tabla);
     aed2::Conj<tp3::diccString< tp3::Dato> >::Iterador itS = cj.CrearIt();
     while (itS.HaySiguiente()) {

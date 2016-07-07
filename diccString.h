@@ -14,8 +14,10 @@ namespace tp3{
 
 template<class Significado>
 struct tupString {
+
     tupString(string cla, const Significado& sign) : clave(cla), significado(sign) {};
-    bool operator==(const tupString& other) const {                             //No sé por qué presiento que esto no debería ser necesario, pero me lo pide en tabla...
+
+    bool operator==(const tupString& other) const {
       return (clave == other.clave && significado == other.significado);
     }
 
@@ -23,23 +25,35 @@ struct tupString {
     Significado significado;
 };
 
+
+// Diccionario(String, Significado) implementado en Trie.
+
 template<class Significado>
 class diccString {
 public:
 
     diccString();
+    diccString(const diccString<Significado>& other);
     ~diccString();
 
     void definir(const string& clave, const Significado& significado);
+
     bool def(const string& clave) const;
+
     Significado& obtener(const string& clave) const;
+
     const Conj<string> claves() const;
+
     void borrar(string clave);
+
+    //Ver valores en private
     class Lista<struct tupString<Significado> >::const_Iterador vistaDicc() const;
+
     string min() const;
+
     string max() const;
 
-    diccString(const diccString<Significado>& other);
+
     diccString<Significado>& operator=(const diccString<Significado>& other);
     bool operator==(const diccString<Significado>& other) const;
     bool operator!=(const diccString<Significado>& other) const;
@@ -48,6 +62,7 @@ public:
 private:
 
     struct Trie {
+
         Trie() : valor(NULL), cantHijos(0) {
           for (int i = 0; i < 256; i++) {
             hijos[i] = NULL;
@@ -55,14 +70,26 @@ private:
         }
 
         class Lista<struct tupString<Significado> >::Iterador* valor;
+
         Trie* hijos[256];
+
+        //Guarda la cantidad de subarboles descendientes, se usa en el borrado
         unsigned int cantHijos;
     };
+
+    //Diccionario sobre el cual se opera realmente
     Trie nodoTrie;
+
+    //Lista de tuplas < String, Significado > para devolver un const_Iterador (se podría haber implementado DFS/BFS apilando los 256 hijos como en diccNat)
     Lista<class tupString<Significado> > valores;
 
 
 };
+
+/*  ***********************************
+    diccString
+    ***********************************
+*/
 
 template<class Significado>
 ostream& operator<<(ostream& os, const diccString<Significado>& d){
@@ -93,9 +120,7 @@ template<class Significado>
 diccString<Significado>::~diccString(){
   string minimo;
   while ( nodoTrie.cantHijos > 0 ){
-    //std::cout << "Hijos: " << nodoTrie.cantHijos << std::endl;
     minimo = min();
-    //std::cout << "Mínimo: " << minimo << std::endl;
     borrar(minimo);
   }
 }
@@ -177,13 +202,13 @@ void diccString<Significado>::borrar(string clave) {
         if (i + 1 != clave.length() ){
          temp->cantHijos--;
         }
-        if ( i+1 == clave.length() ) {
-          temp->valor->EliminarSiguiente();
+        if ( i+1 == clave.length() ) {                                          // Se elimina el nodo correspondiente a
+          temp->valor->EliminarSiguiente();                                     //    la clave
           delete temp->valor;
           temp->valor = NULL;
         }
-        if ( !borrar && temp->cantHijos == 0 && temp->valor == NULL) {
-          actual->hijos[(unsigned char) clave[i]] = NULL;
+        if ( !borrar && temp->cantHijos == 0 && temp->valor == NULL) {          // Ya no hay más nodos útiles, se desengancha
+          actual->hijos[(unsigned char) clave[i]] = NULL;                       //    y se liberan todos los nodos que siguen
           borrar = true;
         }
         actual = temp;
@@ -203,6 +228,9 @@ class Lista<tupString<Significado> >::const_Iterador diccString<Significado>::vi
 template<class Significado>
 string diccString<Significado>::min() const {
     assert(this->nodoTrie.cantHijos > 0);
+
+    // Se itera tomando siempre el hijo menor
+    //    hasta conseguir un valor != NULL
     const Trie* actual = &(this->nodoTrie);
     bool termine = false;
     bool seguir;
@@ -228,6 +256,9 @@ template<class Significado>
 string diccString<Significado>::max() const {
     assert(this->nodoTrie.cantHijos > 0);
 
+    // Se itera tomando simpre el hijo mayor
+    //    mientras haya subarboles validos
+    //    - Se devuelve el último valor válido del recorrido
     const Trie* actual = &(this->nodoTrie);
     bool termine = false;
     string res;
@@ -263,7 +294,8 @@ diccString<Significado>& diccString<Significado>::operator=(const diccString<Sig
 
 template<class Significado>
 bool diccString<Significado>::operator==(const diccString<Significado>& other) const {
-    bool res = true;
+    bool res = true;  //hasta que se demuestre lo contrario
+    // other vs this
     class Lista< tupString<Significado> >::const_Iterador it = other.valores.CrearIt();
     while ( it.HaySiguiente() && res ) {
       string k = it.Siguiente().clave;
@@ -275,6 +307,7 @@ bool diccString<Significado>::operator==(const diccString<Significado>& other) c
       }
       it.Avanzar();
     }
+    // this vs other
     it = valores.CrearIt();
     while ( it.HaySiguiente() && res ) {
       string k = it.Siguiente().clave;
