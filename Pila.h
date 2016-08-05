@@ -12,7 +12,7 @@ namespace tp3
 {
 
 //Pila minimal implementada sobre módulo Lista (enlazada)
-// (FIFO)
+// (LIFO)
 
 
 template<typename T>
